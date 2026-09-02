@@ -50,41 +50,71 @@ export default function Escaner({ onScan }: Props) {
     }
   }
 
-  async function activarCamara() {
+  function activarCamara() {
     setErrorCamara(null);
-    try {
-      const { Html5Qrcode } = await import("html5-qrcode");
-      const instancia = new Html5Qrcode(ID_CAMARA);
-      scannerRef.current = instancia;
-      await instancia.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 260, height: 140 } },
-        (textoDecodificado: string) => emitirCodigo(textoDecodificado),
-        () => {} // errores de lectura frame a frame, se ignoran (es normal mientras enfoca)
-      );
-      setCamaraActiva(true);
-    } catch (err) {
-      console.error(err);
-      setErrorCamara("No se pudo abrir la cámara. Revisá los permisos del navegador.");
-    }
+    // Solo pide mostrar el contenedor; el arranque real de la camara
+    // ocurre en el useEffect de abajo, una vez que el div ya esta
+    // visible en pantalla (ver comentario ahi).
+    setCamaraActiva(true);
   }
 
-  async function detenerCamara() {
-    try {
-      await scannerRef.current?.stop();
-      await scannerRef.current?.clear();
-    } catch {
-      // si ya estaba detenida, no pasa nada
-    }
+  function detenerCamara() {
     setCamaraActiva(false);
-    setTimeout(() => inputRef.current?.focus(), 50);
   }
 
+  // Arranca/para la camara reaccionando a camaraActiva en vez de hacerlo
+  // dentro del handler del boton. Esto es clave: html5-qrcode necesita que
+  // el div #lector-camara ya este visible (no display:none) en el momento
+  // de llamar a start(), porque calcula el tamano del recuadro de escaneo
+  // en base al tamano del contenedor. Antes se llamaba a start() con el
+  // div todavia oculto y recien despues se lo mostraba, lo que rompia el
+  // calculo y la camara no llegaba a leer codigos (sobre todo en celulares).
   useEffect(() => {
+    if (!camaraActiva) return;
+    let cancelado = false;
+
+    (async () => {
+      try {
+        const { Html5Qrcode } = await import("html5-qrcode");
+        if (cancelado) return;
+        const instancia = new Html5Qrcode(ID_CAMARA);
+        scannerRef.current = instancia;
+        await instancia.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 260, height: 140 } },
+          (textoDecodificado: string) => emitirCodigo(textoDecodificado),
+          () => {} // errores de lectura frame a frame, se ignoran (es normal mientras enfoca)
+        );
+        if (cancelado) {
+          try {
+            await instancia.stop();
+          } catch {}
+          try {
+            instancia.clear();
+          } catch {}
+        }
+      } catch (err) {
+        console.error(err);
+        if (!cancelado) {
+          setErrorCamara("No se pudo abrir la cámara. Revisá los permisos del navegador.");
+          setCamaraActiva(false);
+        }
+      }
+    })();
+
     return () => {
-      scannerRef.current?.stop().catch(() => {});
+      cancelado = true;
+      scannerRef.current
+        ?.stop()
+        .catch(() => {})
+        .finally(() => {
+          try {
+            scannerRef.current?.clear();
+          } catch {}
+        });
+      setTimeout(() => inputRef.current?.focus(), 50);
     };
-  }, []);
+  }, [camaraActiva]);
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
