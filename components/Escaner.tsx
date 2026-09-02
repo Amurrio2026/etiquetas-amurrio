@@ -131,7 +131,18 @@ export default function Escaner({ onScan }: Props) {
 
       {errorCamara && <p className="text-sm text-red-600 mb-2">{errorCamara}</p>}
 
-      <div id={ID_CAMARA} className={camaraActiva ? "mb-3 rounded-md overflow-hidden" : "hidden"} />
+      {/*
+        min-height fijo: html5-qrcode mide el tamaño del contenedor apenas
+        arranca, ANTES de insertar el video adentro. Si el div todavía no
+        tiene alto (porque está vacío y depende del contenido para crecer),
+        esa medición da 0 y en varios celulares (Samsung Internet, Chrome
+        Android) la cámara queda "prendida" pero el video nunca se ve.
+      */}
+      <div
+        id={ID_CAMARA}
+        className={camaraActiva ? "mb-3 rounded-md overflow-hidden" : "hidden"}
+        style={camaraActiva ? { minHeight: 280 } : undefined}
+      />
 
       <form onSubmit={alEnviarInput}>
         <input
