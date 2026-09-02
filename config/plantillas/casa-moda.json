@@ -1,0 +1,116 @@
+{
+  "id": "casa-moda",
+  "marca": "Casa Moda",
+  "_fuente": "TAG PRECIOS 8x3,8_casamoda.pdf — medidas extraidas del PDF original, en mm salvo que se indique lo contrario",
+
+  "label": {
+    "width_mm": 80,
+    "height_mm": 38,
+    "background": "#FFFFFF"
+  },
+
+  "palette": {
+    "ink": "#231F20",
+    "grey": "#D1D3D4",
+    "white": "#FFFFFF"
+  },
+
+  "fonts": {
+    "_decision": "Casa Moda usa Arial en el diseño original -- Arial no tiene restricción de licencia para este uso, pero se usa Helvetica (fuente estándar de cualquier PDF) porque es la equivalencia exacta y no requiere ningún archivo.",
+    "regular": { "family": "Helvetica-Bold", "weight": 700 },
+    "bold": { "family": "Helvetica-Bold", "weight": 700 },
+    "extrabold": { "family": "Helvetica-Bold", "weight": 700 }
+  },
+
+  "elements": [
+    {
+      "id": "titulo",
+      "type": "text",
+      "field": "articulo.descripcion",
+      "x": 3.5, "y": 1.0, "w": 73, "h": 4.5,
+      "font": "regular", "size_pt": 7.5, "color": "ink",
+      "align": "center", "valign": "top"
+    },
+    {
+      "id": "linea_1",
+      "type": "rule_con_puntas",
+      "y": 6.17, "x0": 3.49, "x1": 76.51,
+      "color": "grey", "grosor_pt": 0.5, "puntas": false
+    },
+    {
+      "id": "pill_efectivo",
+      "type": "pill",
+      "x": 4.34, "y": 9.45, "w": 18.73, "h": 3.96,
+      "fill": "grey",
+      "label": { "text": "Precio Efectivo", "font": "bold", "size_pt": 6, "color": "ink" }
+    },
+    {
+      "id": "precio_efectivo",
+      "type": "text",
+      "field": "articulo.precio_venta",
+      "_nota": "por ahora sin descuento propio: igual a precio_lista, hasta que se defina la regla de descuento por efectivo (misma decision que Grand Bazaar)",
+      "format": "moneda_ars_sin_decimales",
+      "x": 24.6, "baseline_y": 16.6, "w": 46,
+      "font": "extrabold", "size_pt": 23, "color": "ink", "align": "left"
+    },
+    {
+      "id": "linea_2",
+      "type": "rule_con_puntas",
+      "y": 16.93, "x0": 3.49, "x1": 76.51,
+      "color": "grey", "grosor_pt": 0.5, "puntas": false
+    },
+    {
+      "id": "pill_lista",
+      "type": "pill",
+      "x": 4.34, "y": 20.04, "w": 18.73, "h": 3.92,
+      "fill": "grey",
+      "label": { "text": "Precio de Lista", "font": "bold", "size_pt": 6, "color": "ink" }
+    },
+    {
+      "id": "precio_lista",
+      "type": "text",
+      "field": "articulo.precio_venta",
+      "format": "moneda_ars_sin_decimales",
+      "x": 24.6, "baseline_y": 26.5, "w": 42,
+      "font": "extrabold", "size_pt": 21, "color": "ink", "align": "left"
+    },
+    {
+      "id": "linea_3",
+      "type": "rule_con_puntas",
+      "y": 26.99, "x0": 3.49, "x1": 76.51,
+      "color": "grey", "grosor_pt": 0.5, "puntas": false
+    },
+    {
+      "id": "codigo",
+      "type": "text",
+      "template": "Código: {articulo.sku}",
+      "x": 4.94, "baseline_y": 31.6, "w": 45,
+      "font": "regular", "size_pt": 6, "color": "ink", "align": "left",
+      "letter_spacing_mm": 0.3
+    },
+    {
+      "id": "pill_legal",
+      "type": "pill",
+      "x": 3.63, "y": 31.96, "w": 39.66, "h": 3.14,
+      "fill": "ink",
+      "label": {
+        "text": "Los precios incluyen impuestos nacionales.",
+        "font": "regular", "size_pt": 5, "color": "white"
+      }
+    },
+    {
+      "id": "logo",
+      "type": "image",
+      "asset": "logos/casa-moda.png",
+      "align_right_margin_mm": 3.5,
+      "align_bottom_margin_mm": 2.9,
+      "w": 26.7, "h": 3.45
+    }
+  ],
+
+  "pendientes": [
+    "Precio Efectivo = Precio de Lista por ahora, misma decision que Grand Bazaar (2026-09-02): ambos muestran precio_venta hasta que exista una regla real de descuento por efectivo.",
+    "Logo ya extraido como PNG transparente (logos/casa-moda.png) a partir de CASAMODA-02.jpg.jpeg -- es un logo simple en negro, sin la complicacion de color de Grand Bazaar.",
+    "Tipografia: se usa Helvetica (equivalente estandar de Arial), sin dependencias ni licencias que resolver -- a diferencia de Grand Bazaar, esta plantilla no tiene fuentes pendientes."
+  ]
+}

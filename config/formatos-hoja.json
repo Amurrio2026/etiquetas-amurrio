@@ -1,0 +1,26 @@
+[
+  {
+    "id": "a4-2x5",
+    "nombre": "A4 - 2 columnas x 5 filas (10 etiquetas)",
+    "hojaAnchoMm": 210,
+    "hojaAltoMm": 297,
+    "columnas": 2,
+    "filas": 5,
+    "margenXMm": 5,
+    "margenYMm": 22.5,
+    "espacioXMm": 4,
+    "espacioYMm": 3
+  },
+  {
+    "id": "a4-1x5",
+    "nombre": "A4 - 1 columna x 5 filas (5 etiquetas, mas margen)",
+    "hojaAnchoMm": 210,
+    "hojaAltoMm": 297,
+    "columnas": 1,
+    "filas": 5,
+    "margenXMm": 56,
+    "margenYMm": 22.5,
+    "espacioXMm": 0,
+    "espacioYMm": 3
+  }
+]

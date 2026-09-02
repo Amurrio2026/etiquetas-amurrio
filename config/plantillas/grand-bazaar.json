@@ -1,0 +1,123 @@
+{
+  "id": "grand-bazaar",
+  "marca": "Grand Bazaar",
+  "_fuente": "GB_ETIQUEAS 9,8x4,8CM.pdf — medidas extraídas del PDF original, en mm salvo que se indique lo contrario",
+
+  "label": {
+    "width_mm": 98,
+    "height_mm": 48,
+    "background": "#FFFFFF"
+  },
+
+  "palette": {
+    "ink": "#231F20",
+    "grey": "#D1D3D4",
+    "white": "#FFFFFF"
+  },
+
+  "fonts": {
+    "_decision": "2026-09-02: se usa Baloo 2 (Google Fonts, libre) hasta que exista licencia de Gilroy con comprobante y cobertura de uso en software. Cambiar acá reemplaza la fuente en toda la etiqueta.",
+    "regular": { "family": "Baloo 2", "weight": 500 },
+    "bold": { "family": "Baloo 2", "weight": 700 },
+    "extrabold": { "family": "Baloo 2", "weight": 800 }
+  },
+
+  "elements": [
+    {
+      "id": "banda_inferior",
+      "type": "rect",
+      "x": 0, "y": 39.85, "w": 98, "h": 8.15,
+      "fill": "grey"
+    },
+    {
+      "id": "titulo",
+      "type": "text",
+      "field": "articulo.descripcion",
+      "x": 6.5, "y": 3.2, "w": 85, "h": 3.6,
+      "font": "regular", "size_pt": 8.5, "color": "ink",
+      "align": "center", "valign": "top"
+    },
+    {
+      "id": "linea_1",
+      "type": "rule_con_puntas",
+      "y": 8.6, "x0": 6.4, "x1": 91.1,
+      "color": "grey", "grosor_pt": 0.5, "diametro_punta_mm": 0.8
+    },
+    {
+      "id": "pill_efectivo",
+      "type": "pill",
+      "x": 6.0, "y": 12.1, "w": 20.5, "h": 4.3,
+      "fill": "grey",
+      "label": { "text": "Precio Efectivo", "font": "bold", "size_pt": 7, "color": "ink" }
+    },
+    {
+      "id": "precio_efectivo",
+      "type": "text",
+      "field": "articulo.precio_venta",
+      "_nota": "por ahora sin descuento propio: igual a precio_lista, hasta que se defina la regla de descuento por efectivo",
+      "format": "moneda_ars_sin_decimales",
+      "x": 24.3, "baseline_y": 20.0, "w": 45.5,
+      "font": "extrabold", "size_pt": 26, "color": "ink", "align": "left"
+    },
+    {
+      "id": "linea_2",
+      "type": "rule_con_puntas",
+      "y": 20.3, "x0": 6.4, "x1": 91.1,
+      "color": "grey", "grosor_pt": 0.5, "diametro_punta_mm": 0.8
+    },
+    {
+      "id": "pill_lista",
+      "type": "pill",
+      "x": 6.0, "y": 23.7, "w": 20.5, "h": 4.3,
+      "fill": "grey",
+      "label": { "text": "Precio de Lista", "font": "bold", "size_pt": 7, "color": "ink" }
+    },
+    {
+      "id": "precio_lista",
+      "type": "text",
+      "field": "articulo.precio_venta",
+      "format": "moneda_ars_sin_decimales",
+      "x": 24.3, "baseline_y": 30.9, "w": 40,
+      "font": "extrabold", "size_pt": 24, "color": "ink", "align": "left"
+    },
+    {
+      "id": "linea_3",
+      "type": "rule_con_puntas",
+      "y": 31.3, "x0": 6.4, "x1": 91.1,
+      "color": "grey", "grosor_pt": 0.5, "diametro_punta_mm": 0.8
+    },
+    {
+      "id": "codigo",
+      "type": "text",
+      "template": "Código: {articulo.sku}",
+      "x": 8.0, "baseline_y": 36.6, "w": 50,
+      "font": "regular", "size_pt": 7, "color": "ink", "align": "left",
+      "letter_spacing_mm": 0.35
+    },
+    {
+      "id": "pill_legal",
+      "type": "pill",
+      "x": 6.67, "y": 38.59, "w": 45.3, "h": 3.12,
+      "fill": "ink",
+      "label": {
+        "text": "Los precios incluyen impuestos nacionales.",
+        "font": "regular", "size_pt": 5.3, "color": "white"
+      }
+    },
+    {
+      "id": "logo",
+      "type": "image",
+      "asset": "logos/grand-bazaar.png",
+      "align_right_margin_mm": 6.5,
+      "align_bottom_margin_mm": 5.2,
+      "w": 16.6, "h": 8.7,
+      "_nota": "PNG transparente ya generado (negro #231F20 + blanco, fondo transparente) a partir del isologo que mandó Lucila — mismo trazo que el del PDF original"
+    }
+  ],
+
+  "pendientes": [
+    "Precio Efectivo = Precio de Lista por ahora (decisión 2026-09-02): ambos muestran precio_venta hasta que se defina una regla real de descuento por pago en efectivo. Cuando esa regla exista, solo hay que cambiar el 'field' de precio_efectivo — el resto de la plantilla no se toca.",
+    "RESUELTO (2026-09-02): logo ya extraído como PNG transparente (logos/grand-bazaar.png) a partir de la foto que mandó Lucila. Se recortó el fondo y se recoloreó el trazo azul a negro #231F20 para que coincida con el impreso; se verificó que las letras queden blancas tanto sobre blanco como sobre la franja gris.",
+    "RESUELTO (2026-09-02): se sigue con Baloo 2 (libre) mientras se define la licencia de Gilroy con la diseñadora. Los archivos Gilroy que se recibieron no traían comprobante de compra y, aunque lo tuvieran, esa licencia puntual no cubre uso dentro de una aplicación. Si más adelante llega una licencia válida para software, el cambio es solo editar el bloque 'fonts' de este archivo."
+  ]
+}
