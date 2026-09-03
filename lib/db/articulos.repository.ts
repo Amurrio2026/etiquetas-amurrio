@@ -11,11 +11,15 @@ async function cargarCacheDesdeBaseReal(): Promise<Map<string, Articulo>> {
   const pool = getPool();
   if (!pool) throw new Error("DATABASE_URL no configurada");
 
+  // OJO: no se filtra por "activo". Se probó en producción (2026-09-03) y la
+  // gran mayoria de los articulos reales (15.238 de ~20.000) figuran con
+  // activo=false en la base aunque esten a la venta en el local -- ese campo
+  // no refleja "esta en el local ahora", asi que filtrar por el dejaba sin
+  // encontrar la mayoria de los codigos reales escaneados.
   const { rows } = await pool.query(
     `select sku, descripcion, categoria, marca, precio_venta
        from maestros.articulos
-      where activo = true
-        and descripcion is not null
+      where descripcion is not null
         and precio_venta is not null`
   );
 
