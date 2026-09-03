@@ -56,7 +56,7 @@
       "field": "articulo.precio_venta",
       "_nota": "por ahora sin descuento propio: igual a precio_lista, hasta que se defina la regla de descuento por efectivo",
       "format": "moneda_ars_sin_decimales",
-      "x": 24.3, "baseline_y": 20.0, "w": 45.5,
+      "x": 28.16, "baseline_y": 20.0, "w": 45.5,
       "font": "extrabold", "size_pt": 26, "color": "ink", "align": "left"
     },
     {
@@ -77,7 +77,7 @@
       "type": "text",
       "field": "articulo.precio_venta",
       "format": "moneda_ars_sin_decimales",
-      "x": 24.3, "baseline_y": 30.9, "w": 40,
+      "x": 28.16, "baseline_y": 30.9, "w": 40,
       "font": "extrabold", "size_pt": 24, "color": "ink", "align": "left"
     },
     {
