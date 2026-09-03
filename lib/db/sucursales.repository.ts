@@ -3,15 +3,16 @@ import { SUCURSALES_MOCK } from "@/lib/mock/sucursales";
 import type { Sucursal } from "@/types";
 
 /**
- * Por ahora la app solo trabaja con la marca "Grand Bazaar" (ver decision del
- * 2026-09-02: piloto arranca solo con esa marca). Cuando se sume Casa Moda,
- * esto pasa a recibir la marca como parametro en vez de estar fija.
+ * Marcas habilitadas en la app (2026-09-03: se suma Casa Moda al piloto,
+ * que arrancó solo con Grand Bazaar). Agregar una marca nueva acá alcanza
+ * para que aparezcan sus sucursales -- la plantilla correcta se resuelve
+ * sola en base a "marca" (ver lib/config.ts).
  */
-const MARCA_ACTIVA = "Grand Bazaar";
+const MARCAS_ACTIVAS = ["Grand Bazaar", "Casa Moda"];
 
 export async function listarSucursalesActivas(): Promise<Sucursal[]> {
   if (!tieneBaseReal()) {
-    return SUCURSALES_MOCK.filter((s) => s.marca === MARCA_ACTIVA);
+    return SUCURSALES_MOCK.filter((s) => MARCAS_ACTIVAS.includes(s.marca));
   }
 
   const pool = getPool()!;
@@ -19,9 +20,9 @@ export async function listarSucursalesActivas(): Promise<Sucursal[]> {
     `select codigo_sucursal, nombre, marca, email
        from maestros.sucursales
       where activo = true
-        and marca = $1
-      order by nombre`,
-    [MARCA_ACTIVA]
+        and marca = any($1)
+      order by marca, nombre`,
+    [MARCAS_ACTIVAS]
   );
 
   return rows.map((r) => ({
