@@ -1,10 +1,18 @@
+
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { google } from "googleapis";
 import type { PedidoHistorial } from "@/types";
 
 const RANGO_HOJA = "Historial!A:M";
-const ARCHIVO_LOCAL = path.join(process.cwd(), "lib", "historial", "historial.local.json");
+// os.tmpdir() en vez de una carpeta del proyecto: en Vercel (y en cualquier
+// funcion serverless) el codigo desplegado es de solo lectura, la unica
+// carpeta donde se puede escribir es la temporal del sistema. Ojo: en
+// Vercel esa carpeta es efimera (se puede borrar entre pedidos), asi que
+// esto es solo un respaldo minimo mientras no este configurado Google
+// Sheets - no reemplaza tenerlo bien configurado para produccion.
+const ARCHIVO_LOCAL = path.join(os.tmpdir(), "etiquetas-amurrio-historial.local.json");
 
 function filaDesdePedido(p: PedidoHistorial): (string | number)[] {
   return [
