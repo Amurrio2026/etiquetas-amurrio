@@ -69,21 +69,32 @@ export async function POST(req: NextRequest) {
       nombrePdf,
     });
 
-    const destinoHistorial = await registrarPedido({
-      idPedido,
-      fecha,
-      hora,
-      usuario,
-      sucursal: sucursal.nombre,
-      marca: sucursal.marca,
-      articulosDistintos: lineas.length,
-      totalEtiquetas: total,
-      detalle: lineas.map((l) => `${l.articulo.sku}:${l.cantidad}`).join(", "),
-      formatoHoja: formato.nombre,
-      nombrePdf,
-      estadoEnvio: resultadoEnvio.prueba ? "prueba" : resultadoEnvio.enviado ? "enviado" : "error",
-      fechaEnvio: `${fecha} ${hora}`,
-    });
+    // El historial se registra aparte, sin que un problema ahi tire abajo
+    // toda la respuesta: el mail ya se mando en el paso de arriba, asi que
+    // si esto falla igual le tenemos que avisar al usuario que el envio
+    // funciono (el historial es un registro secundario, no el resultado
+    // principal de este endpoint).
+    let historialGuardadoEn: "sheets" | "local" | "no_guardado" = "no_guardado";
+    try {
+      const destinoHistorial = await registrarPedido({
+        idPedido,
+        fecha,
+        hora,
+        usuario,
+        sucursal: sucursal.nombre,
+        marca: sucursal.marca,
+        articulosDistintos: lineas.length,
+        totalEtiquetas: total,
+        detalle: lineas.map((l) => `${l.articulo.sku}:${l.cantidad}`).join(", "),
+        formatoHoja: formato.nombre,
+        nombrePdf,
+        estadoEnvio: resultadoEnvio.prueba ? "prueba" : resultadoEnvio.enviado ? "enviado" : "error",
+        fechaEnvio: `${fecha} ${hora}`,
+      });
+      historialGuardadoEn = destinoHistorial.destino;
+    } catch (err) {
+      console.error("No se pudo registrar el historial (el mail ya se había enviado bien)", err);
+    }
 
     return NextResponse.json({
       ok: true,
@@ -92,7 +103,7 @@ export async function POST(req: NextRequest) {
       modoPrueba: resultadoEnvio.prueba,
       totalEtiquetas: total,
       articulosDistintos: lineas.length,
-      historialGuardadoEn: destinoHistorial.destino,
+      historialGuardadoEn,
       faltantes,
     });
   } catch (err) {
