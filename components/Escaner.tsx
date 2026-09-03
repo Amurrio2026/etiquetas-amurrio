@@ -23,10 +23,18 @@ export default function Escaner({ onScan }: Props) {
 
   // Mantiene el foco en el input para que el lector USB siempre pueda "escribir" ahi.
   useEffect(() => {
-    const reenfocar = () => {
-      if (!camaraActiva) inputRef.current?.focus();
+    if (!camaraActiva) inputRef.current?.focus();
+
+    const reenfocar = (e: MouseEvent) => {
+      if (camaraActiva) return;
+      const target = e.target as HTMLElement | null;
+      // No robar el foco si el clic fue sobre otro control interactivo
+      // (los <select> de sucursal/formato, otros inputs, botones...): si no,
+      // el desplegable se abre y se cierra solo porque el foco vuelve
+      // inmediatamente al input del lector apenas se lo toca.
+      if (target?.closest("select, input, textarea, button, a")) return;
+      inputRef.current?.focus();
     };
-    reenfocar();
     document.addEventListener("click", reenfocar);
     return () => document.removeEventListener("click", reenfocar);
   }, [camaraActiva]);
