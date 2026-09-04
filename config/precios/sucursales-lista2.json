@@ -1,0 +1,4 @@
+{
+  "_comentario": "Sucursales (por nombre, tal cual figuran en maestros.sucursales) donde el precio de Lista se cobra con la lista 2 en vez de la lista 3. Para sumar otra sucursal a esta excepcion, agregar su nombre acá -- no hace falta tocar código. El precio Efectivo no depende de esta lista: siempre es precio_lista6.",
+  "sucursales": ["Ayacucho", "Rauch", "Madariaga"]
+}

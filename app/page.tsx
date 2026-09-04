@@ -5,19 +5,28 @@ import Escaner from "@/components/Escaner";
 import ListadoEtiquetas, { type LineaUI } from "@/components/ListadoEtiquetas";
 import SelectorSucursal from "@/components/SelectorSucursal";
 import SelectorFormato from "@/components/SelectorFormato";
-import type { Articulo, FormatoHoja, Sucursal } from "@/types";
+import SelectorTipoPrecio from "@/components/SelectorTipoPrecio";
+import CargaMasiva, { type ResultadoValidacion } from "@/components/CargaMasiva";
+import type { ArticuloConPrecio, FormatoHoja, Sucursal, TipoPrecio } from "@/types";
+
+type Modo = "escaneo" | "masivo";
 
 export default function Home() {
+  const [modo, setModo] = useState<Modo>("escaneo");
+
   const [lineas, setLineas] = useState<LineaUI[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [formatos, setFormatos] = useState<FormatoHoja[]>([]);
   const [sucursalCodigo, setSucursalCodigo] = useState<number | null>(null);
   const [formatoId, setFormatoId] = useState<string | null>(null);
+  const [tipoPrecio, setTipoPrecio] = useState<TipoPrecio>("lista");
   const [usuario, setUsuario] = useState("");
 
-  const [articuloEncontrado, setArticuloEncontrado] = useState<Articulo | null>(null);
+  const [articuloEncontrado, setArticuloEncontrado] = useState<ArticuloConPrecio | null>(null);
   const [cantidadPendiente, setCantidadPendiente] = useState(1);
   const [aviso, setAviso] = useState<{ tipo: "error" | "info" | "ok"; texto: string } | null>(null);
+
+  const [resultadoMasivo, setResultadoMasivo] = useState<ResultadoValidacion | null>(null);
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [generando, setGenerando] = useState(false);
@@ -46,27 +55,48 @@ export default function Home() {
     [sucursales, sucursalCodigo]
   );
 
+  function cambiarModo(nuevo: Modo) {
+    setModo(nuevo);
+    setAviso(null);
+    setPdfUrl(null);
+  }
+
   async function alEscanear(codigo: string) {
     setAviso(null);
     setPdfUrl(null);
+    if (!sucursalCodigo) {
+      setAviso({ tipo: "error", texto: "Elegí primero la sucursal (el precio depende de ella)." });
+      return;
+    }
     try {
-      const res = await fetch(`/api/articulos/buscar?sku=${encodeURIComponent(codigo)}`);
+      const params = new URLSearchParams({
+        sku: codigo,
+        sucursalCodigo: String(sucursalCodigo),
+        tipoPrecio,
+      });
+      const res = await fetch(`/api/articulos/buscar?${params}`);
       if (res.status === 404) {
         setAviso({ tipo: "error", texto: `No se encontró ningún artículo con el código ${codigo}.` });
         setArticuloEncontrado(null);
         return;
       }
       if (!res.ok) throw new Error("error de conexión");
-      const articulo: Articulo = await res.json();
+      const articulo: ArticuloConPrecio = await res.json();
       setArticuloEncontrado(articulo);
       setCantidadPendiente(1);
+      if (articulo.precioVenta === null) {
+        setAviso({
+          tipo: "error",
+          texto: `${articulo.descripcion} todavía no tiene precio cargado para "${tipoPrecio === "efectivo" ? "Efectivo" : "Lista"}" en esta sucursal.`,
+        });
+      }
     } catch {
       setAviso({ tipo: "error", texto: "No se pudo consultar la base de artículos. Probá de nuevo." });
     }
   }
 
   function agregarAlListado() {
-    if (!articuloEncontrado) return;
+    if (!articuloEncontrado || articuloEncontrado.precioVenta === null) return;
     setLineas((prev) => {
       const existe = prev.find((l) => l.articulo.sku === articuloEncontrado.sku);
       if (existe) {
@@ -92,11 +122,26 @@ export default function Home() {
   }
 
   function lineasParaApi() {
+    if (modo === "masivo") return resultadoMasivo?.lineasValidas ?? [];
     return lineas.map((l) => ({ sku: l.articulo.sku, cantidad: l.cantidad }));
   }
 
+  function hayAlgoParaGenerar() {
+    if (modo === "masivo") return (resultadoMasivo?.resumen.encontrados ?? 0) > 0;
+    return lineas.length > 0;
+  }
+
+  function leerListaHeader(res: Response, header: string): string[] {
+    try {
+      const crudo = res.headers.get(header);
+      return crudo ? (JSON.parse(decodeURIComponent(crudo)) as string[]) : [];
+    } catch {
+      return [];
+    }
+  }
+
   async function generarPdf() {
-    if (lineas.length === 0 || !formatoId) return;
+    if (!hayAlgoParaGenerar() || !formatoId || !sucursalCodigo) return;
     setGenerando(true);
     setAviso(null);
     try {
@@ -104,7 +149,8 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          marca: sucursalActual?.marca ?? "Grand Bazaar",
+          sucursalCodigo,
+          tipoPrecio,
           formatoId,
           lineas: lineasParaApi(),
         }),
@@ -113,8 +159,16 @@ export default function Home() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "No se pudo generar el PDF");
       }
+      const faltantes = leerListaHeader(res, "X-Faltantes");
+      const sinPrecio = leerListaHeader(res, "X-Sin-Precio");
       const blob = await res.blob();
       setPdfUrl(URL.createObjectURL(blob));
+      if (faltantes.length > 0 || sinPrecio.length > 0) {
+        setAviso({
+          tipo: "info",
+          texto: `El PDF se generó, pero se dejaron afuera: ${faltantes.length} código(s) no encontrado(s), ${sinPrecio.length} sin precio cargado.`,
+        });
+      }
     } catch (err: any) {
       setAviso({ tipo: "error", texto: err.message || "No se pudo generar el PDF." });
     } finally {
@@ -123,7 +177,7 @@ export default function Home() {
   }
 
   async function enviarPorEmail() {
-    if (!sucursalCodigo || !formatoId || lineas.length === 0) return;
+    if (!sucursalCodigo || !formatoId || !hayAlgoParaGenerar()) return;
     setEnviando(true);
     setAviso(null);
     try {
@@ -132,19 +186,27 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sucursalCodigo,
+          tipoPrecio,
           formatoId,
           usuario: usuario || "sin especificar",
+          origen: modo,
           lineas: lineasParaApi(),
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo enviar el mail");
 
+      const avisoExtra =
+        (data.faltantes?.length || data.sinPrecio?.length)
+          ? ` (se dejaron afuera ${data.faltantes?.length ?? 0} no encontrado(s) y ${data.sinPrecio?.length ?? 0} sin precio)`
+          : "";
+
       setAviso({
         tipo: "ok",
-        texto: data.modoPrueba
-          ? `Enviado en modo prueba a ${data.destinatario} (en vez de a ${sucursalActual?.nombre}).`
-          : `Enviado a ${sucursalActual?.nombre} (${data.destinatario}).`,
+        texto:
+          (data.modoPrueba
+            ? `Enviado en modo prueba a ${data.destinatario} (en vez de a ${sucursalActual?.nombre}).`
+            : `Enviado a ${sucursalActual?.nombre} (${data.destinatario}).`) + avisoExtra,
       });
     } catch (err: any) {
       setAviso({ tipo: "error", texto: err.message || "No se pudo enviar el mail." });
@@ -158,7 +220,7 @@ export default function Home() {
       <header className="border-b border-gray-200 bg-white">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <h1 className="text-lg font-bold text-gray-900">Etiquetas Amurrio</h1>
-          <p className="text-xs text-gray-500">Piloto: solo sucursales Grand Bazaar</p>
+          <p className="text-xs text-gray-500">Piloto: sucursales Grand Bazaar y Casa Moda</p>
         </div>
       </header>
 
@@ -178,50 +240,11 @@ export default function Home() {
           </div>
         )}
 
-        <Escaner onScan={alEscanear} />
-
-        {articuloEncontrado && (
-          <div className="rounded-lg border border-gray-900 bg-white p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">Artículo encontrado</p>
-            <p className="font-semibold text-gray-900">{articuloEncontrado.descripcion}</p>
-            <p className="text-sm text-gray-500 mb-3">
-              {articuloEncontrado.sku} · ${Math.round(articuloEncontrado.precioVenta).toLocaleString("es-AR")}
-            </p>
-            <div className="flex items-end gap-3">
-              <label className="block">
-                <span className="text-xs font-semibold text-gray-700">Cantidad de etiquetas</span>
-                <input
-                  type="number"
-                  min={1}
-                  autoFocus
-                  value={cantidadPendiente}
-                  onChange={(e) => setCantidadPendiente(Math.max(1, Number(e.target.value) || 1))}
-                  onKeyDown={(e) => e.key === "Enter" && agregarAlListado()}
-                  className="mt-1 w-28 rounded-md border border-gray-300 px-3 py-2 text-sm"
-                />
-              </label>
-              <button
-                onClick={agregarAlListado}
-                className="rounded-md bg-gray-900 text-white text-sm font-medium px-4 py-2 hover:bg-gray-700"
-              >
-                Agregar
-              </button>
-              <button
-                onClick={() => setArticuloEncontrado(null)}
-                className="text-sm text-gray-500 px-2 py-2 hover:text-gray-800"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        )}
-
-        <ListadoEtiquetas lineas={lineas} onCambiarCantidad={cambiarCantidad} onEliminar={eliminarLinea} />
-
         <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-          <h2 className="text-sm font-semibold text-gray-700">Sucursal y formato</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <h2 className="text-sm font-semibold text-gray-700">Sucursal, tipo de precio y formato</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <SelectorSucursal sucursales={sucursales} valor={sucursalCodigo} onCambiar={setSucursalCodigo} />
+            <SelectorTipoPrecio valor={tipoPrecio} onCambiar={setTipoPrecio} />
             <SelectorFormato formatos={formatos} valor={formatoId} onCambiar={setFormatoId} />
           </div>
           <label className="block">
@@ -235,10 +258,89 @@ export default function Home() {
           </label>
         </div>
 
+        <div className="flex gap-2 rounded-lg border border-gray-200 bg-white p-1 shadow-sm w-fit">
+          <button
+            type="button"
+            onClick={() => cambiarModo("escaneo")}
+            className={
+              "rounded-md px-4 py-1.5 text-sm font-medium " +
+              (modo === "escaneo" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100")
+            }
+          >
+            Escanear
+          </button>
+          <button
+            type="button"
+            onClick={() => cambiarModo("masivo")}
+            className={
+              "rounded-md px-4 py-1.5 text-sm font-medium " +
+              (modo === "masivo" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100")
+            }
+          >
+            Carga masiva
+          </button>
+        </div>
+
+        {modo === "escaneo" ? (
+          <>
+            <Escaner onScan={alEscanear} />
+
+            {articuloEncontrado && (
+              <div className="rounded-lg border border-gray-900 bg-white p-4 shadow-sm">
+                <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">Artículo encontrado</p>
+                <p className="font-semibold text-gray-900">{articuloEncontrado.descripcion}</p>
+                <p className="text-sm text-gray-500 mb-3">
+                  {articuloEncontrado.sku} ·{" "}
+                  {articuloEncontrado.precioVenta === null
+                    ? "sin precio cargado"
+                    : `$${Math.round(articuloEncontrado.precioVenta).toLocaleString("es-AR")}`}
+                </p>
+                <div className="flex items-end gap-3">
+                  <label className="block">
+                    <span className="text-xs font-semibold text-gray-700">Cantidad de etiquetas</span>
+                    <input
+                      type="number"
+                      min={1}
+                      autoFocus
+                      value={cantidadPendiente}
+                      onChange={(e) => setCantidadPendiente(Math.max(1, Number(e.target.value) || 1))}
+                      onKeyDown={(e) => e.key === "Enter" && agregarAlListado()}
+                      className="mt-1 w-28 rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    />
+                  </label>
+                  <button
+                    onClick={agregarAlListado}
+                    disabled={articuloEncontrado.precioVenta === null}
+                    className="rounded-md bg-gray-900 text-white text-sm font-medium px-4 py-2 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Agregar
+                  </button>
+                  <button
+                    onClick={() => setArticuloEncontrado(null)}
+                    className="text-sm text-gray-500 px-2 py-2 hover:text-gray-800"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <ListadoEtiquetas lineas={lineas} onCambiarCantidad={cambiarCantidad} onEliminar={eliminarLinea} />
+          </>
+        ) : (
+          <CargaMasiva
+            sucursalCodigo={sucursalCodigo}
+            tipoPrecio={tipoPrecio}
+            resultado={resultadoMasivo}
+            onResultado={setResultadoMasivo}
+            onError={(texto) => setAviso({ tipo: "error", texto })}
+          />
+        )}
+
         <div className="flex flex-wrap gap-3">
           <button
             onClick={generarPdf}
-            disabled={lineas.length === 0 || generando}
+            disabled={!hayAlgoParaGenerar() || generando}
             className="rounded-md bg-gray-900 text-white text-sm font-medium px-5 py-2.5 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {generando ? "Generando..." : "Generar PDF"}

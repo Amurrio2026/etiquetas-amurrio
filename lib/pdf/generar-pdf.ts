@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { PDFDocument, PDFFont, PDFPage, rgb, type RGB } from "pdf-lib";
-import type { Articulo, FormatoHoja, Plantilla, PlantillaElemento } from "@/types";
+import type { ArticuloConPrecio, FormatoHoja, Plantilla, PlantillaElemento } from "@/types";
 import { cargarFuentesDePlantilla, type JuegoFuentes } from "@/lib/pdf/fonts";
 import { paginarEtiquetas, type Hoja } from "@/lib/pdf/paginar";
 import type { LineaEtiqueta } from "@/types";
@@ -40,7 +40,10 @@ function formatearValor(valor: unknown, formato: string | undefined): string {
 // Las plantillas nombran los campos como en la base ("precio_venta") para que
 // sea mas facil de leer/editar para alguien no-programador; ac se traduce al
 // nombre real de la propiedad en el objeto Articulo (camelCase en TS).
-const ALIAS_CAMPO: Record<string, keyof Articulo> = {
+// "precio_venta" sigue siendo el nombre que usan las plantillas JSON (no hace
+// falta tocarlas): mapea al precio YA RESUELTO segun sucursal + tipo de
+// precio (ver lib/precios/resolver-precio.ts), no a una columna de la base.
+const ALIAS_CAMPO: Record<string, keyof ArticuloConPrecio> = {
   precio_venta: "precioVenta",
   sku: "sku",
   descripcion: "descripcion",
@@ -49,7 +52,7 @@ const ALIAS_CAMPO: Record<string, keyof Articulo> = {
 };
 
 /** Reemplaza "articulo.campo" por el valor real del articulo. */
-function resolverCampo(ruta: string, articulo: Articulo): unknown {
+function resolverCampo(ruta: string, articulo: ArticuloConPrecio): unknown {
   const partes = ruta.split(".");
   if (partes[0] !== "articulo") return undefined;
   const clave = ALIAS_CAMPO[partes[1]];
@@ -57,7 +60,7 @@ function resolverCampo(ruta: string, articulo: Articulo): unknown {
   return articulo[clave];
 }
 
-function resolverTemplateTexto(tpl: string, articulo: Articulo): string {
+function resolverTemplateTexto(tpl: string, articulo: ArticuloConPrecio): string {
   return tpl.replace(/\{([^}]+)\}/g, (_match, ruta) => String(resolverCampo(ruta, articulo) ?? ""));
 }
 
@@ -94,7 +97,7 @@ async function dibujarEtiqueta(
   offsetXMm: number,
   offsetYMm: number,
   plantilla: Plantilla,
-  articulo: Articulo,
+  articulo: ArticuloConPrecio,
   fuentes: JuegoFuentes,
   logoImg: Awaited<ReturnType<PDFDocument["embedPng"]>> | null
 ) {

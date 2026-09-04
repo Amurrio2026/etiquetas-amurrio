@@ -1,7 +1,7 @@
-import type { Articulo, FormatoHoja, LineaEtiqueta } from "@/types";
+import type { ArticuloConPrecio, FormatoHoja, LineaEtiqueta } from "@/types";
 
 export interface EtiquetaPosicionada {
-  articulo: Articulo;
+  articulo: ArticuloConPrecio;
   columna: number; // 0-based
   fila: number; // 0-based
 }
@@ -19,7 +19,7 @@ export function paginarEtiquetas(lineas: LineaEtiqueta[], formato: FormatoHoja):
   const porHoja = formato.columnas * formato.filas;
   if (porHoja <= 0) throw new Error("Formato de hoja invalido: columnas x filas debe ser mayor a 0");
 
-  const instancias: Articulo[] = [];
+  const instancias: ArticuloConPrecio[] = [];
   for (const linea of lineas) {
     for (let i = 0; i < linea.cantidad; i++) instancias.push(linea.articulo);
   }

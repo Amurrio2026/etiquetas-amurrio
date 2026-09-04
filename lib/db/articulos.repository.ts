@@ -15,12 +15,20 @@ async function cargarCacheDesdeBaseReal(): Promise<Map<string, Articulo>> {
   // gran mayoria de los articulos reales (15.238 de ~20.000) figuran con
   // activo=false en la base aunque esten a la venta en el local -- ese campo
   // no refleja "esta en el local ahora", asi que filtrar por el dejaba sin
-  // encontrar la mayoria de los codigos reales escaneados.
+  // encontrar la mayoria de los codigos reales escaneados. Se trae igual
+  // (junto con "discontinuado") para mostrarlo como aviso informativo, no
+  // para excluir nada.
+  //
+  // 2026-09-04: la columna "precio_venta" de esta tabla se RENOMBRO a
+  // "precio_lista2" al incorporarse las listas 3 y 6 (ver DISENO_BBDD_AZURE
+  // §4.1 / §9.10) -- consultarla por su nombre viejo rompe con "column
+  // precio_venta does not exist". Ahora se traen las 3 listas por separado;
+  // cuál se muestra en la etiqueta se resuelve en lib/precios/resolver-precio.ts
+  // según sucursal + tipo de precio elegido, no acá.
   const { rows } = await pool.query(
-    `select sku, descripcion, categoria, marca, precio_venta
+    `select sku, descripcion, categoria, marca, precio_lista2, precio_lista3, precio_lista6, activo, discontinuado
        from maestros.articulos
-      where descripcion is not null
-        and precio_venta is not null`
+      where descripcion is not null`
   );
 
   const mapa = new Map<string, Articulo>();
@@ -30,7 +38,11 @@ async function cargarCacheDesdeBaseReal(): Promise<Map<string, Articulo>> {
       descripcion: r.descripcion,
       categoria: r.categoria,
       marcaProducto: r.marca,
-      precioVenta: Number(r.precio_venta),
+      precioLista2: r.precio_lista2 != null ? Number(r.precio_lista2) : null,
+      precioLista3: r.precio_lista3 != null ? Number(r.precio_lista3) : null,
+      precioLista6: r.precio_lista6 != null ? Number(r.precio_lista6) : null,
+      activo: Boolean(r.activo),
+      discontinuado: Boolean(r.discontinuado),
     });
   }
   return mapa;
@@ -60,6 +72,24 @@ export async function buscarArticuloPorSku(sku: string): Promise<Articulo | null
 
   const mapa = await obtenerCache();
   return mapa.get(codigo) ?? null;
+}
+
+/**
+ * Busca muchos SKUs de una sola vez (carga masiva). Como el maestro completo
+ * ya vive en memoria (ver obtenerCache/TTL de 5 min), esto NO dispara una
+ * query nueva ni una query por SKU -- son lookups en un Map, instantaneos
+ * incluso con miles de codigos.
+ */
+export async function buscarArticulosPorSkus(skus: string[]): Promise<Map<string, Articulo>> {
+  const mapa = tieneBaseReal() ? await obtenerCache() : cargarCacheMock();
+  const resultado = new Map<string, Articulo>();
+  for (const skuCrudo of skus) {
+    const codigo = skuCrudo.trim();
+    if (!codigo) continue;
+    const articulo = mapa.get(codigo);
+    if (articulo) resultado.set(codigo, articulo);
+  }
+  return resultado;
 }
 
 export function usandoDatosDeEjemplo(): boolean {

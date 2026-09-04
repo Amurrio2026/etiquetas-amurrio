@@ -1,9 +1,9 @@
 "use client";
 
-import type { Articulo } from "@/types";
+import type { ArticuloConPrecio } from "@/types";
 
 export interface LineaUI {
-  articulo: Articulo;
+  articulo: ArticuloConPrecio;
   cantidad: number;
 }
 
@@ -47,7 +47,7 @@ export default function ListadoEtiquetas({ lineas, onCambiarCantidad, onEliminar
                   <td className="py-2 pr-2">{l.articulo.descripcion}</td>
                   <td className="py-2 pr-2 font-mono text-xs text-gray-500">{l.articulo.sku}</td>
                   <td className="py-2 pr-2 tabular-nums">
-                    ${Math.round(l.articulo.precioVenta).toLocaleString("es-AR")}
+                    ${Math.round(l.articulo.precioVenta ?? 0).toLocaleString("es-AR")}
                   </td>
                   <td className="py-2 pr-2">
                     <input

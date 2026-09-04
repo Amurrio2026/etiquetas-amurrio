@@ -7,11 +7,14 @@ import { resolverLineas, type LineaPedida } from "@/lib/pdf/resolver-lineas";
 import { listarSucursalesActivas } from "@/lib/db/sucursales.repository";
 import { enviarEtiquetasPorEmail } from "@/lib/email/resend";
 import { registrarPedido } from "@/lib/historial/registrar";
+import type { TipoPrecio } from "@/types";
 
 interface CuerpoEnvio {
   sucursalCodigo: number;
   formatoId: string;
   usuario: string;
+  tipoPrecio: TipoPrecio;
+  origen?: "escaneo" | "masivo";
   lineas: LineaPedida[];
 }
 
@@ -41,9 +44,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `${sucursal.nombre} no tiene un mail configurado todavía` }, { status: 400 });
   }
 
-  const { lineas, faltantes } = await resolverLineas(cuerpo.lineas);
+  const tipoPrecio: TipoPrecio = cuerpo.tipoPrecio === "efectivo" ? "efectivo" : "lista";
+  const origen = cuerpo.origen === "masivo" ? "masivo" : "escaneo";
+
+  const { lineas, faltantes, sinPrecio } = await resolverLineas(cuerpo.lineas, sucursal, tipoPrecio);
   if (lineas.length === 0) {
-    return NextResponse.json({ error: "Ninguno de los artículos existe", faltantes }, { status: 400 });
+    return NextResponse.json(
+      { error: "Ninguno de los artículos tiene precio cargado para generar la etiqueta", faltantes, sinPrecio },
+      { status: 400 }
+    );
   }
 
   try {
@@ -67,6 +76,8 @@ export async function POST(req: NextRequest) {
       totalEtiquetas: total,
       pdfBytes,
       nombrePdf,
+      tipoPrecio,
+      origen,
     });
 
     // El historial se registra aparte, sin que un problema ahi tire abajo
@@ -105,6 +116,7 @@ export async function POST(req: NextRequest) {
       articulosDistintos: lineas.length,
       historialGuardadoEn,
       faltantes,
+      sinPrecio,
     });
   } catch (err) {
     console.error("Error enviando etiquetas por email", err);

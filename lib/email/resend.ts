@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import type { Sucursal } from "@/types";
+import type { Sucursal, TipoPrecio } from "@/types";
 
 export interface DatosEnvioEtiquetas {
   sucursal: Sucursal;
@@ -9,6 +9,9 @@ export interface DatosEnvioEtiquetas {
   totalEtiquetas: number;
   pdfBytes: Uint8Array;
   nombrePdf: string;
+  tipoPrecio: TipoPrecio;
+  /** "escaneo" (uno por uno) o "masivo" (carga de archivo) -- solo cambia el asunto/cuerpo del mail. */
+  origen: "escaneo" | "masivo";
 }
 
 function esModoPrueba(): boolean {
@@ -25,8 +28,15 @@ function destinatarioReal(sucursal: Sucursal): { email: string; prueba: boolean 
   return { email: sucursal.email, prueba: false };
 }
 
-function armarAsunto(sucursal: Sucursal, fecha: string, prueba: boolean): string {
-  const base = `Etiquetas de artículos - Sucursal ${sucursal.nombre} - ${fecha}`;
+const ETIQUETA_TIPO_PRECIO: Record<TipoPrecio, string> = { efectivo: "Efectivo", lista: "Lista" };
+const ETIQUETA_ORIGEN: Record<DatosEnvioEtiquetas["origen"], string> = {
+  escaneo: "Escaneo",
+  masivo: "Carga masiva",
+};
+
+function armarAsunto(datos: DatosEnvioEtiquetas, prueba: boolean): string {
+  const origen = datos.origen === "masivo" ? " - Carga masiva" : "";
+  const base = `Etiquetas de artículos - Sucursal ${datos.sucursal.nombre}${origen} - ${datos.fecha}`;
   return prueba ? `[PRUEBA] ${base}` : base;
 }
 
@@ -42,6 +52,8 @@ function armarCuerpo(datos: DatosEnvioEtiquetas, prueba: boolean): string {
     <p>Sucursal: <strong>${datos.sucursal.nombre}</strong></p>
     <p>Fecha: ${datos.fecha}</p>
     <p>Usuario: ${datos.usuario}</p>
+    <p>Origen: ${ETIQUETA_ORIGEN[datos.origen]}</p>
+    <p>Tipo de precio: ${ETIQUETA_TIPO_PRECIO[datos.tipoPrecio]}</p>
     <p>Artículos distintos: ${datos.articulosDistintos}</p>
     <p>Cantidad total de etiquetas: ${datos.totalEtiquetas}</p>
   `;
@@ -58,7 +70,7 @@ function armarCuerpo(datos: DatosEnvioEtiquetas, prueba: boolean): string {
  */
 export async function enviarEtiquetasPorEmail(datos: DatosEnvioEtiquetas): Promise<{ prueba: boolean; enviado: boolean; destinatario: string }> {
   const { email, prueba } = destinatarioReal(datos.sucursal);
-  const asunto = armarAsunto(datos.sucursal, datos.fecha, prueba);
+  const asunto = armarAsunto(datos, prueba);
   const cuerpo = armarCuerpo(datos, prueba);
 
   const apiKey = process.env.RESEND_API_KEY;
