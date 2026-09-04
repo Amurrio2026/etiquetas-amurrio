@@ -47,8 +47,8 @@
     {
       "id": "precio_efectivo",
       "type": "text",
-      "field": "articulo.precio_venta",
-      "_nota": "por ahora sin descuento propio: igual a precio_lista, hasta que se defina la regla de descuento por efectivo (misma decision que Grand Bazaar)",
+      "field": "articulo.precio_efectivo",
+      "_nota": "RESUELTO (2026-09-04): precio_lista6 de la base (el que se cobra en caja), resuelto en lib/precios/resolver-precio.ts. Antes era igual a precio_lista como placeholder -- ya no.",
       "format": "moneda_ars_sin_decimales",
       "x": 24.6, "baseline_y": 16.6, "w": 46,
       "font": "extrabold", "size_pt": 23, "color": "ink", "align": "left"
@@ -69,7 +69,8 @@
     {
       "id": "precio_lista",
       "type": "text",
-      "field": "articulo.precio_venta",
+      "field": "articulo.precio_lista",
+      "_nota": "RESUELTO (2026-09-04): precio_lista2 (Ayacucho/Rauch/Madariaga) o precio_lista3 (resto), segun sucursal -- ver lib/precios/resolver-precio.ts.",
       "format": "moneda_ars_sin_decimales",
       "x": 24.6, "baseline_y": 26.5, "w": 42,
       "font": "extrabold", "size_pt": 21, "color": "ink", "align": "left"
@@ -109,7 +110,7 @@
   ],
 
   "pendientes": [
-    "Precio Efectivo = Precio de Lista por ahora, misma decision que Grand Bazaar (2026-09-02): ambos muestran precio_venta hasta que exista una regla real de descuento por efectivo.",
+    "RESUELTO (2026-09-04): Precio Efectivo y Precio de Lista ya se resuelven por separado (lista6 / lista2-lista3 segun sucursal) -- ver lib/precios/resolver-precio.ts.",
     "Logo ya extraido como PNG transparente (logos/casa-moda.png) a partir de CASAMODA-02.jpg.jpeg -- es un logo simple en negro, sin la complicacion de color de Grand Bazaar.",
     "Tipografia: se usa Helvetica (equivalente estandar de Arial), sin dependencias ni licencias que resolver -- a diferencia de Grand Bazaar, esta plantilla no tiene fuentes pendientes."
   ]

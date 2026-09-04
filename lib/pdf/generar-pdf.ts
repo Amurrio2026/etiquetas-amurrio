@@ -31,20 +31,25 @@ function fuentePorRol(fuentes: JuegoFuentes, rol: string): PDFFont {
 
 function formatearValor(valor: unknown, formato: string | undefined): string {
   if (formato === "moneda_ars_sin_decimales") {
+    // null = todavia no hay precio cargado en esa lista para este articulo
+    // (ver lib/precios/resolver-precio.ts) -- se imprime "-", nunca "$0"
+    // (mostrar $0 en una etiqueta fisica seria un precio inventado).
+    if (valor === null || valor === undefined) return "-";
     const n = Math.round(Number(valor) || 0);
     return "$" + n.toLocaleString("es-AR", { maximumFractionDigits: 0 });
   }
   return String(valor ?? "");
 }
 
-// Las plantillas nombran los campos como en la base ("precio_venta") para que
-// sea mas facil de leer/editar para alguien no-programador; ac se traduce al
-// nombre real de la propiedad en el objeto Articulo (camelCase en TS).
-// "precio_venta" sigue siendo el nombre que usan las plantillas JSON (no hace
-// falta tocarlas): mapea al precio YA RESUELTO segun sucursal + tipo de
-// precio (ver lib/precios/resolver-precio.ts), no a una columna de la base.
+// Las plantillas nombran los campos como en la base ("precio_efectivo",
+// "precio_lista") para que sea mas facil de leer/editar para alguien
+// no-programador; aca se traduce al nombre real de la propiedad en el
+// objeto ArticuloConPrecio (camelCase en TS). Estos dos son los precios YA
+// RESUELTOS segun sucursal (ver lib/precios/resolver-precio.ts), no
+// columnas de la base -- la etiqueta siempre muestra los dos juntos.
 const ALIAS_CAMPO: Record<string, keyof ArticuloConPrecio> = {
-  precio_venta: "precioVenta",
+  precio_efectivo: "precioEfectivo",
+  precio_lista: "precioLista",
   sku: "sku",
   descripcion: "descripcion",
   categoria: "categoria",

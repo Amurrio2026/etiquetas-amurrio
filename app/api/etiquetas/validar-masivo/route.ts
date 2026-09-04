@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolverLineasMasivo, type LineaPedida } from "@/lib/pdf/resolver-lineas";
 import { listarSucursalesActivas } from "@/lib/db/sucursales.repository";
-import type { TipoPrecio } from "@/types";
 
 interface CuerpoValidar {
   sucursalCodigo: number;
-  tipoPrecio: TipoPrecio;
   items: { sku: string; cantidad?: number }[];
 }
 
@@ -29,7 +27,6 @@ export async function POST(req: NextRequest) {
   if (!sucursal) {
     return NextResponse.json({ error: "La sucursal elegida no existe" }, { status: 400 });
   }
-  const tipoPrecio: TipoPrecio = cuerpo.tipoPrecio === "efectivo" ? "efectivo" : "lista";
 
   // Suma cantidades de SKUs repetidos en el archivo (decisión de Lucila,
   // 2026-09-04) y deja registro de cuáles estaban duplicados para el resumen.
@@ -45,10 +42,9 @@ export async function POST(req: NextRequest) {
   }
 
   const pedidas: LineaPedida[] = Array.from(cantidadPorSku.entries()).map(([sku, cantidad]) => ({ sku, cantidad }));
-  const { lineas, faltantes, sinPrecio, inactivosODiscontinuados } = await resolverLineasMasivo(
+  const { lineas, faltantes, sinPrecio, precioParcial, inactivosODiscontinuados } = await resolverLineasMasivo(
     pedidas,
-    sucursal,
-    tipoPrecio
+    sucursal
   );
 
   return NextResponse.json({
@@ -59,6 +55,7 @@ export async function POST(req: NextRequest) {
       encontrados: lineas.length,
       noEncontrados: faltantes.length,
       sinPrecio: sinPrecio.length,
+      precioParcial: precioParcial.length,
       inactivosODiscontinuados: inactivosODiscontinuados.length,
       totalEtiquetas: lineas.reduce((acc, l) => acc + l.cantidad, 0),
     },
@@ -66,6 +63,7 @@ export async function POST(req: NextRequest) {
       duplicados: Array.from(duplicados),
       noEncontrados: faltantes,
       sinPrecio,
+      precioParcial,
       inactivosODiscontinuados,
     },
     // Listo para mandar tal cual a /api/etiquetas/pdf o /api/envios/email.

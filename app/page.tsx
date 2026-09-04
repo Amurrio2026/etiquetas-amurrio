@@ -5,11 +5,14 @@ import Escaner from "@/components/Escaner";
 import ListadoEtiquetas, { type LineaUI } from "@/components/ListadoEtiquetas";
 import SelectorSucursal from "@/components/SelectorSucursal";
 import SelectorFormato from "@/components/SelectorFormato";
-import SelectorTipoPrecio from "@/components/SelectorTipoPrecio";
 import CargaMasiva, { type ResultadoValidacion } from "@/components/CargaMasiva";
-import type { ArticuloConPrecio, FormatoHoja, Sucursal, TipoPrecio } from "@/types";
+import type { ArticuloConPrecio, FormatoHoja, Sucursal } from "@/types";
 
 type Modo = "escaneo" | "masivo";
+
+function formatearPrecio(v: number | null): string {
+  return v === null ? "sin precio cargado" : `$${Math.round(v).toLocaleString("es-AR")}`;
+}
 
 export default function Home() {
   const [modo, setModo] = useState<Modo>("escaneo");
@@ -19,7 +22,6 @@ export default function Home() {
   const [formatos, setFormatos] = useState<FormatoHoja[]>([]);
   const [sucursalCodigo, setSucursalCodigo] = useState<number | null>(null);
   const [formatoId, setFormatoId] = useState<string | null>(null);
-  const [tipoPrecio, setTipoPrecio] = useState<TipoPrecio>("lista");
   const [usuario, setUsuario] = useState("");
 
   const [articuloEncontrado, setArticuloEncontrado] = useState<ArticuloConPrecio | null>(null);
@@ -69,11 +71,7 @@ export default function Home() {
       return;
     }
     try {
-      const params = new URLSearchParams({
-        sku: codigo,
-        sucursalCodigo: String(sucursalCodigo),
-        tipoPrecio,
-      });
+      const params = new URLSearchParams({ sku: codigo, sucursalCodigo: String(sucursalCodigo) });
       const res = await fetch(`/api/articulos/buscar?${params}`);
       if (res.status === 404) {
         setAviso({ tipo: "error", texto: `No se encontró ningún artículo con el código ${codigo}.` });
@@ -84,10 +82,10 @@ export default function Home() {
       const articulo: ArticuloConPrecio = await res.json();
       setArticuloEncontrado(articulo);
       setCantidadPendiente(1);
-      if (articulo.precioVenta === null) {
+      if (articulo.precioEfectivo === null && articulo.precioLista === null) {
         setAviso({
           tipo: "error",
-          texto: `${articulo.descripcion} todavía no tiene precio cargado para "${tipoPrecio === "efectivo" ? "Efectivo" : "Lista"}" en esta sucursal.`,
+          texto: `${articulo.descripcion} todavía no tiene ningún precio cargado en esta sucursal.`,
         });
       }
     } catch {
@@ -96,7 +94,8 @@ export default function Home() {
   }
 
   function agregarAlListado() {
-    if (!articuloEncontrado || articuloEncontrado.precioVenta === null) return;
+    if (!articuloEncontrado) return;
+    if (articuloEncontrado.precioEfectivo === null && articuloEncontrado.precioLista === null) return;
     setLineas((prev) => {
       const existe = prev.find((l) => l.articulo.sku === articuloEncontrado.sku);
       if (existe) {
@@ -148,12 +147,7 @@ export default function Home() {
       const res = await fetch("/api/etiquetas/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sucursalCodigo,
-          tipoPrecio,
-          formatoId,
-          lineas: lineasParaApi(),
-        }),
+        body: JSON.stringify({ sucursalCodigo, formatoId, lineas: lineasParaApi() }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -166,7 +160,7 @@ export default function Home() {
       if (faltantes.length > 0 || sinPrecio.length > 0) {
         setAviso({
           tipo: "info",
-          texto: `El PDF se generó, pero se dejaron afuera: ${faltantes.length} código(s) no encontrado(s), ${sinPrecio.length} sin precio cargado.`,
+          texto: `El PDF se generó, pero se dejaron afuera: ${faltantes.length} código(s) no encontrado(s), ${sinPrecio.length} sin ningún precio cargado.`,
         });
       }
     } catch (err: any) {
@@ -186,7 +180,6 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sucursalCodigo,
-          tipoPrecio,
           formatoId,
           usuario: usuario || "sin especificar",
           origen: modo,
@@ -197,8 +190,8 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error || "No se pudo enviar el mail");
 
       const avisoExtra =
-        (data.faltantes?.length || data.sinPrecio?.length)
-          ? ` (se dejaron afuera ${data.faltantes?.length ?? 0} no encontrado(s) y ${data.sinPrecio?.length ?? 0} sin precio)`
+        data.faltantes?.length || data.sinPrecio?.length
+          ? ` (se dejaron afuera ${data.faltantes?.length ?? 0} no encontrado(s) y ${data.sinPrecio?.length ?? 0} sin ningún precio)`
           : "";
 
       setAviso({
@@ -241,10 +234,13 @@ export default function Home() {
         )}
 
         <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-          <h2 className="text-sm font-semibold text-gray-700">Sucursal, tipo de precio y formato</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <h2 className="text-sm font-semibold text-gray-700">Sucursal y formato</h2>
+          <p className="text-xs text-gray-500">
+            Cada etiqueta muestra los dos precios juntos: Efectivo (lista 6) y Lista (lista 2 o 3 según
+            la sucursal) — no hay que elegir uno.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <SelectorSucursal sucursales={sucursales} valor={sucursalCodigo} onCambiar={setSucursalCodigo} />
-            <SelectorTipoPrecio valor={tipoPrecio} onCambiar={setTipoPrecio} />
             <SelectorFormato formatos={formatos} valor={formatoId} onCambiar={setFormatoId} />
           </div>
           <label className="block">
@@ -290,10 +286,8 @@ export default function Home() {
                 <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">Artículo encontrado</p>
                 <p className="font-semibold text-gray-900">{articuloEncontrado.descripcion}</p>
                 <p className="text-sm text-gray-500 mb-3">
-                  {articuloEncontrado.sku} ·{" "}
-                  {articuloEncontrado.precioVenta === null
-                    ? "sin precio cargado"
-                    : `$${Math.round(articuloEncontrado.precioVenta).toLocaleString("es-AR")}`}
+                  {articuloEncontrado.sku} · Efectivo {formatearPrecio(articuloEncontrado.precioEfectivo)} · Lista{" "}
+                  {formatearPrecio(articuloEncontrado.precioLista)}
                 </p>
                 <div className="flex items-end gap-3">
                   <label className="block">
@@ -310,7 +304,7 @@ export default function Home() {
                   </label>
                   <button
                     onClick={agregarAlListado}
-                    disabled={articuloEncontrado.precioVenta === null}
+                    disabled={articuloEncontrado.precioEfectivo === null && articuloEncontrado.precioLista === null}
                     className="rounded-md bg-gray-900 text-white text-sm font-medium px-4 py-2 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Agregar
@@ -330,7 +324,6 @@ export default function Home() {
         ) : (
           <CargaMasiva
             sucursalCodigo={sucursalCodigo}
-            tipoPrecio={tipoPrecio}
             resultado={resultadoMasivo}
             onResultado={setResultadoMasivo}
             onError={(texto) => setAviso({ tipo: "error", texto })}

@@ -3,11 +3,9 @@ import { cargarPlantillaPorMarca, buscarFormatoHoja } from "@/lib/config";
 import { generarPdf } from "@/lib/pdf/generar-pdf";
 import { resolverLineas, type LineaPedida } from "@/lib/pdf/resolver-lineas";
 import { listarSucursalesActivas } from "@/lib/db/sucursales.repository";
-import type { TipoPrecio } from "@/types";
 
 interface CuerpoPedido {
   sucursalCodigo: number;
-  tipoPrecio: TipoPrecio;
   formatoId: string;
   lineas: LineaPedida[];
 }
@@ -28,11 +26,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "La sucursal elegida no existe" }, { status: 400 });
   }
 
-  const tipoPrecio: TipoPrecio = cuerpo.tipoPrecio === "efectivo" ? "efectivo" : "lista";
-  const { lineas, faltantes, sinPrecio } = await resolverLineas(cuerpo.lineas, sucursal, tipoPrecio);
+  const { lineas, faltantes, sinPrecio, precioParcial } = await resolverLineas(cuerpo.lineas, sucursal);
   if (lineas.length === 0) {
     return NextResponse.json(
-      { error: "Ninguno de los artículos tiene precio cargado para generar la etiqueta", faltantes, sinPrecio },
+      { error: "Ninguno de los artículos tiene algún precio cargado para generar la etiqueta", faltantes, sinPrecio },
       { status: 400 }
     );
   }
@@ -52,6 +49,7 @@ export async function POST(req: NextRequest) {
         "Content-Disposition": `inline; filename="etiquetas.pdf"`,
         "X-Faltantes": encodeURIComponent(JSON.stringify(faltantes)),
         "X-Sin-Precio": encodeURIComponent(JSON.stringify(sinPrecio)),
+        "X-Precio-Parcial": encodeURIComponent(JSON.stringify(precioParcial)),
       },
     });
   } catch (err) {

@@ -35,3 +35,19 @@ export function resolverPrecio(articulo: Articulo, sucursal: Sucursal, tipoPreci
     lista === "lista2" ? articulo.precioLista2 : lista === "lista3" ? articulo.precioLista3 : articulo.precioLista6;
   return valor && valor > 0 ? valor : null;
 }
+
+/**
+ * Resuelve los DOS precios que muestra la etiqueta a la vez (Efectivo y
+ * Lista) -- no es una eleccion entre uno u otro, los dos van siempre juntos
+ * en la misma etiqueta (ver plantillas casa-moda.json / grand-bazaar.json,
+ * elementos "precio_efectivo" y "precio_lista").
+ */
+export function resolverPrecios(
+  articulo: Articulo,
+  sucursal: Sucursal
+): { precioEfectivo: number | null; precioLista: number | null } {
+  return {
+    precioEfectivo: resolverPrecio(articulo, sucursal, "efectivo"),
+    precioLista: resolverPrecio(articulo, sucursal, "lista"),
+  };
+}

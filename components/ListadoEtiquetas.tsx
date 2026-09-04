@@ -36,7 +36,8 @@ export default function ListadoEtiquetas({ lineas, onCambiarCantidad, onEliminar
               <tr className="text-left text-xs uppercase tracking-wide text-gray-400 border-b border-gray-200">
                 <th className="py-2 pr-2">Artículo</th>
                 <th className="py-2 pr-2">Código</th>
-                <th className="py-2 pr-2">Precio</th>
+                <th className="py-2 pr-2">Efectivo</th>
+                <th className="py-2 pr-2">Lista</th>
                 <th className="py-2 pr-2 w-24">Cantidad</th>
                 <th className="py-2 w-10" />
               </tr>
@@ -47,7 +48,14 @@ export default function ListadoEtiquetas({ lineas, onCambiarCantidad, onEliminar
                   <td className="py-2 pr-2">{l.articulo.descripcion}</td>
                   <td className="py-2 pr-2 font-mono text-xs text-gray-500">{l.articulo.sku}</td>
                   <td className="py-2 pr-2 tabular-nums">
-                    ${Math.round(l.articulo.precioVenta ?? 0).toLocaleString("es-AR")}
+                    {l.articulo.precioEfectivo === null
+                      ? "-"
+                      : `$${Math.round(l.articulo.precioEfectivo).toLocaleString("es-AR")}`}
+                  </td>
+                  <td className="py-2 pr-2 tabular-nums">
+                    {l.articulo.precioLista === null
+                      ? "-"
+                      : `$${Math.round(l.articulo.precioLista).toLocaleString("es-AR")}`}
                   </td>
                   <td className="py-2 pr-2">
                     <input

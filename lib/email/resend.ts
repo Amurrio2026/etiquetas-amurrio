@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import type { Sucursal, TipoPrecio } from "@/types";
+import type { Sucursal } from "@/types";
 
 export interface DatosEnvioEtiquetas {
   sucursal: Sucursal;
@@ -9,7 +9,6 @@ export interface DatosEnvioEtiquetas {
   totalEtiquetas: number;
   pdfBytes: Uint8Array;
   nombrePdf: string;
-  tipoPrecio: TipoPrecio;
   /** "escaneo" (uno por uno) o "masivo" (carga de archivo) -- solo cambia el asunto/cuerpo del mail. */
   origen: "escaneo" | "masivo";
 }
@@ -28,7 +27,6 @@ function destinatarioReal(sucursal: Sucursal): { email: string; prueba: boolean 
   return { email: sucursal.email, prueba: false };
 }
 
-const ETIQUETA_TIPO_PRECIO: Record<TipoPrecio, string> = { efectivo: "Efectivo", lista: "Lista" };
 const ETIQUETA_ORIGEN: Record<DatosEnvioEtiquetas["origen"], string> = {
   escaneo: "Escaneo",
   masivo: "Carga masiva",
@@ -53,7 +51,6 @@ function armarCuerpo(datos: DatosEnvioEtiquetas, prueba: boolean): string {
     <p>Fecha: ${datos.fecha}</p>
     <p>Usuario: ${datos.usuario}</p>
     <p>Origen: ${ETIQUETA_ORIGEN[datos.origen]}</p>
-    <p>Tipo de precio: ${ETIQUETA_TIPO_PRECIO[datos.tipoPrecio]}</p>
     <p>Artículos distintos: ${datos.articulosDistintos}</p>
     <p>Cantidad total de etiquetas: ${datos.totalEtiquetas}</p>
   `;

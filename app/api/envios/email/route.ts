@@ -7,13 +7,11 @@ import { resolverLineas, type LineaPedida } from "@/lib/pdf/resolver-lineas";
 import { listarSucursalesActivas } from "@/lib/db/sucursales.repository";
 import { enviarEtiquetasPorEmail } from "@/lib/email/resend";
 import { registrarPedido } from "@/lib/historial/registrar";
-import type { TipoPrecio } from "@/types";
 
 interface CuerpoEnvio {
   sucursalCodigo: number;
   formatoId: string;
   usuario: string;
-  tipoPrecio: TipoPrecio;
   origen?: "escaneo" | "masivo";
   lineas: LineaPedida[];
 }
@@ -44,13 +42,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `${sucursal.nombre} no tiene un mail configurado todavía` }, { status: 400 });
   }
 
-  const tipoPrecio: TipoPrecio = cuerpo.tipoPrecio === "efectivo" ? "efectivo" : "lista";
   const origen = cuerpo.origen === "masivo" ? "masivo" : "escaneo";
 
-  const { lineas, faltantes, sinPrecio } = await resolverLineas(cuerpo.lineas, sucursal, tipoPrecio);
+  const { lineas, faltantes, sinPrecio, precioParcial } = await resolverLineas(cuerpo.lineas, sucursal);
   if (lineas.length === 0) {
     return NextResponse.json(
-      { error: "Ninguno de los artículos tiene precio cargado para generar la etiqueta", faltantes, sinPrecio },
+      { error: "Ninguno de los artículos tiene algún precio cargado para generar la etiqueta", faltantes, sinPrecio },
       { status: 400 }
     );
   }
@@ -76,7 +73,6 @@ export async function POST(req: NextRequest) {
       totalEtiquetas: total,
       pdfBytes,
       nombrePdf,
-      tipoPrecio,
       origen,
     });
 
@@ -117,6 +113,7 @@ export async function POST(req: NextRequest) {
       historialGuardadoEn,
       faltantes,
       sinPrecio,
+      precioParcial,
     });
   } catch (err) {
     console.error("Error enviando etiquetas por email", err);

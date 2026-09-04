@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { TipoPrecio } from "@/types";
 
 export interface ResumenValidacion {
   totalFilasLeidas: number;
@@ -10,6 +9,7 @@ export interface ResumenValidacion {
   encontrados: number;
   noEncontrados: number;
   sinPrecio: number;
+  precioParcial: number;
   inactivosODiscontinuados: number;
   totalEtiquetas: number;
 }
@@ -18,6 +18,7 @@ export interface DetalleValidacion {
   duplicados: string[];
   noEncontrados: string[];
   sinPrecio: string[];
+  precioParcial: string[];
   inactivosODiscontinuados: string[];
 }
 
@@ -29,7 +30,6 @@ export interface ResultadoValidacion {
 
 interface Props {
   sucursalCodigo: number | null;
-  tipoPrecio: TipoPrecio;
   resultado: ResultadoValidacion | null;
   onResultado: (resultado: ResultadoValidacion | null) => void;
   onError: (mensaje: string) => void;
@@ -84,7 +84,7 @@ async function parsearArchivo(file: File): Promise<FilaCruda[]> {
   throw new Error("Formato no soportado. Subí un archivo .csv, .xlsx o .xls");
 }
 
-export default function CargaMasiva({ sucursalCodigo, tipoPrecio, resultado, onResultado, onError }: Props) {
+export default function CargaMasiva({ sucursalCodigo, resultado, onResultado, onError }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [nombreArchivo, setNombreArchivo] = useState<string | null>(null);
   const [procesando, setProcesando] = useState(false);
@@ -111,7 +111,7 @@ export default function CargaMasiva({ sucursalCodigo, tipoPrecio, resultado, onR
       const res = await fetch("/api/etiquetas/validar-masivo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sucursalCodigo, tipoPrecio, items }),
+        body: JSON.stringify({ sucursalCodigo, items }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo validar el archivo");
@@ -164,14 +164,16 @@ export default function CargaMasiva({ sucursalCodigo, tipoPrecio, resultado, onR
             <Metrica etiqueta="Códigos únicos" valor={resultado.resumen.skusUnicos} />
             <Metrica etiqueta="Listos para generar" valor={resultado.resumen.encontrados} destacado="ok" />
             <Metrica etiqueta="No encontrados" valor={resultado.resumen.noEncontrados} destacado={resultado.resumen.noEncontrados > 0 ? "error" : undefined} />
-            <Metrica etiqueta="Sin precio cargado" valor={resultado.resumen.sinPrecio} destacado={resultado.resumen.sinPrecio > 0 ? "error" : undefined} />
+            <Metrica etiqueta="Sin ningún precio" valor={resultado.resumen.sinPrecio} destacado={resultado.resumen.sinPrecio > 0 ? "error" : undefined} />
+            <Metrica etiqueta="Con un precio en blanco" valor={resultado.resumen.precioParcial} destacado={resultado.resumen.precioParcial > 0 ? "aviso" : undefined} />
             <Metrica etiqueta="Duplicados (sumados)" valor={resultado.resumen.duplicados} />
             <Metrica etiqueta="Inactivos/discontinuados" valor={resultado.resumen.inactivosODiscontinuados} destacado={resultado.resumen.inactivosODiscontinuados > 0 ? "aviso" : undefined} />
             <Metrica etiqueta="Total etiquetas" valor={resultado.resumen.totalEtiquetas} />
           </div>
 
           <ListaDetalle titulo="No encontrados" skus={resultado.detalle.noEncontrados} />
-          <ListaDetalle titulo="Sin precio cargado para este tipo" skus={resultado.detalle.sinPrecio} />
+          <ListaDetalle titulo="Sin ningún precio cargado (no se generan)" skus={resultado.detalle.sinPrecio} />
+          <ListaDetalle titulo="Con Efectivo o Lista en blanco (se generan igual, con '-')" skus={resultado.detalle.precioParcial} />
           <ListaDetalle titulo="Inactivos o discontinuados (se generan igual)" skus={resultado.detalle.inactivosODiscontinuados} />
           <ListaDetalle titulo="Duplicados en el archivo (cantidades sumadas)" skus={resultado.detalle.duplicados} />
 

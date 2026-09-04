@@ -53,8 +53,8 @@
     {
       "id": "precio_efectivo",
       "type": "text",
-      "field": "articulo.precio_venta",
-      "_nota": "por ahora sin descuento propio: igual a precio_lista, hasta que se defina la regla de descuento por efectivo",
+      "field": "articulo.precio_efectivo",
+      "_nota": "RESUELTO (2026-09-04): precio_lista6 de la base (el que se cobra en caja), resuelto en lib/precios/resolver-precio.ts. Antes era igual a precio_lista como placeholder -- ya no.",
       "format": "moneda_ars_sin_decimales",
       "x": 28.16, "baseline_y": 20.0, "w": 45.5,
       "font": "extrabold", "size_pt": 26, "color": "ink", "align": "left"
@@ -75,7 +75,8 @@
     {
       "id": "precio_lista",
       "type": "text",
-      "field": "articulo.precio_venta",
+      "field": "articulo.precio_lista",
+      "_nota": "RESUELTO (2026-09-04): precio_lista2 (Ayacucho/Rauch/Madariaga) o precio_lista3 (resto), segun sucursal -- ver lib/precios/resolver-precio.ts.",
       "format": "moneda_ars_sin_decimales",
       "x": 28.16, "baseline_y": 30.9, "w": 40,
       "font": "extrabold", "size_pt": 24, "color": "ink", "align": "left"
@@ -116,7 +117,7 @@
   ],
 
   "pendientes": [
-    "Precio Efectivo = Precio de Lista por ahora (decisión 2026-09-02): ambos muestran precio_venta hasta que se defina una regla real de descuento por pago en efectivo. Cuando esa regla exista, solo hay que cambiar el 'field' de precio_efectivo — el resto de la plantilla no se toca.",
+    "RESUELTO (2026-09-04): Precio Efectivo y Precio de Lista ya se resuelven por separado (lista6 / lista2-lista3 segun sucursal) -- ver lib/precios/resolver-precio.ts.",
     "RESUELTO (2026-09-02): logo ya extraído como PNG transparente (logos/grand-bazaar.png) a partir de la foto que mandó Lucila. Se recortó el fondo y se recoloreó el trazo azul a negro #231F20 para que coincida con el impreso; se verificó que las letras queden blancas tanto sobre blanco como sobre la franja gris.",
     "RESUELTO (2026-09-02): se sigue con Baloo 2 (libre) mientras se define la licencia de Gilroy con la diseñadora. Los archivos Gilroy que se recibieron no traían comprobante de compra y, aunque lo tuvieran, esa licencia puntual no cubre uso dentro de una aplicación. Si más adelante llega una licencia válida para software, el cambio es solo editar el bloque 'fonts' de este archivo."
   ]

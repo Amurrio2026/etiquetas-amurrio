@@ -25,15 +25,17 @@ export interface Articulo {
 }
 
 /**
- * Un articulo con el precio YA resuelto para una sucursal y un tipo de
- * precio (Efectivo/Lista) puntuales -- es lo que efectivamente se dibuja en
- * la etiqueta. `precioVenta` es `null` solo en la vista previa de "articulo
- * encontrado" cuando todavia no hay precio cargado para ese tipo (nunca
- * deberia llegar `null` hasta el PDF: resolverLineas() filtra esos casos
- * aparte, en "sinPrecio").
+ * Un articulo con los DOS precios ya resueltos para una sucursal puntual --
+ * la etiqueta siempre muestra los dos juntos (pill "Precio Efectivo" +
+ * pill "Precio de Lista"), no es una eleccion de uno u otro. `null` cuando
+ * esa lista todavia no tiene precio cargado para este articulo -- se
+ * imprime como "-" en vez de un precio inventado (ver lib/pdf/generar-pdf.ts).
+ * Si AMBOS son null, la linea se excluye del pedido (no hay nada que
+ * imprimir) -- ver lib/pdf/resolver-lineas.ts.
  */
 export interface ArticuloConPrecio extends Articulo {
-  precioVenta: number | null;
+  precioEfectivo: number | null; // precio_lista6, siempre
+  precioLista: number | null; // precio_lista2 o precio_lista3 segun sucursal
 }
 
 export interface Sucursal {
