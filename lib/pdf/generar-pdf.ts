@@ -87,6 +87,51 @@ function dibujarTextoConTracking(
   }
 }
 
+/**
+ * Ajusta un texto largo (la descripcion del articulo, que no tiene largo
+ * maximo garantizado) para que entre en el ancho disponible, en vez de
+ * sobresalir de la etiqueta como pasaba antes:
+ * 1) intenta UNA linea, achicando la fuente hasta `sizeMinimo`.
+ * 2) si ni asi entra, parte en HASTA 2 lineas al tamaño minimo.
+ * 3) si la segunda linea sigue sin entrar, la corta con "…".
+ */
+function ajustarTextoACaja(
+  font: PDFFont,
+  texto: string,
+  anchoDisponiblePt: number,
+  sizeInicial: number,
+  sizeMinimo: number
+): { lineas: string[]; size: number } {
+  let size = sizeInicial;
+  while (size > sizeMinimo && font.widthOfTextAtSize(texto, size) > anchoDisponiblePt) size -= 0.25;
+  if (font.widthOfTextAtSize(texto, size) <= anchoDisponiblePt) return { lineas: [texto], size };
+
+  size = sizeMinimo;
+  const palabras = texto.split(" ");
+  const lineas: string[] = [];
+  let actual = "";
+  for (const palabra of palabras) {
+    const prueba = actual ? `${actual} ${palabra}` : palabra;
+    if (!actual || font.widthOfTextAtSize(prueba, size) <= anchoDisponiblePt) {
+      actual = prueba;
+    } else {
+      lineas.push(actual);
+      actual = palabra;
+    }
+  }
+  if (actual) lineas.push(actual);
+
+  if (lineas.length > 2) {
+    const resto = lineas.slice(1).join(" ");
+    let segunda = resto;
+    while (segunda.length > 1 && font.widthOfTextAtSize(`${segunda}…`, size) > anchoDisponiblePt) {
+      segunda = segunda.slice(0, -1).trimEnd();
+    }
+    return { lineas: [lineas[0], `${segunda}…`], size };
+  }
+  return { lineas, size };
+}
+
 /** Rectangulo con puntas redondeadas ("pildora"), aproximado con 2 circulos + un rectangulo central. */
 function dibujarPildora(page: PDFPage, xPt: number, yTopPt: number, wPt: number, hPt: number, color: RGB, pageHeightPt: number) {
   const yBottomPt = pageHeightPt - (yTopPt + hPt);
@@ -185,17 +230,46 @@ async function dibujarEtiqueta(
       }
 
       // Texto dentro de una caja (titulo): se centra o alinea segun "align".
+      // Si el texto (tipicamente la descripcion del articulo, que no tiene
+      // largo maximo garantizado) no entra en el ancho de la caja, se achica
+      // la fuente y, si aun asi no entra, se parte en hasta 2 lineas -- ver
+      // ajustarTextoACaja(). Antes esto no se controlaba y el texto podia
+      // salirse de la etiqueta.
       const boxXPt = mm(offsetXMm + el.x);
       const boxYTopPt = mm(offsetYMm + el.y);
       const boxWPt = mm(el.w);
-      const anchoTexto = font.widthOfTextAtSize(texto, size);
-      let xTextoPt = boxXPt;
-      if (el.align === "center") xTextoPt = boxXPt + (boxWPt - anchoTexto) / 2;
-      else if (el.align === "right") xTextoPt = boxXPt + boxWPt - anchoTexto;
+      const boxHPt = mm(el.h ?? 0);
+      const anchoDisponiblePt = boxWPt - mm(1); // un pelo de margen a cada lado
 
-      const baselineOffsetPt = size * 0.78; // aproximacion de la altura de capital para una sola linea
-      const yTextoPt = pageHeightPt - boxYTopPt - baselineOffsetPt;
-      page.drawText(texto, { x: xTextoPt, y: yTextoPt, size, font, color });
+      const sizeMinimo = typeof el.min_size_pt === "number" ? el.min_size_pt : Math.max(5, size - 2.5);
+      const { lineas: lineasTexto, size: sizeAjustado } = ajustarTextoACaja(font, texto, anchoDisponiblePt, size, sizeMinimo);
+
+      const xParaLinea = (linea: string): number => {
+        const anchoLinea = font.widthOfTextAtSize(linea, sizeAjustado);
+        if (el.align === "center") return boxXPt + (boxWPt - anchoLinea) / 2;
+        if (el.align === "right") return boxXPt + boxWPt - anchoLinea;
+        return boxXPt;
+      };
+
+      if (lineasTexto.length === 1) {
+        // Una sola linea: misma posicion vertical de siempre (no cambia nada
+        // para el caso comun de una descripcion que ya entraba bien).
+        const baselineOffsetPt = sizeAjustado * 0.78;
+        const yTextoPt = pageHeightPt - boxYTopPt - baselineOffsetPt;
+        page.drawText(lineasTexto[0], { x: xParaLinea(lineasTexto[0]), y: yTextoPt, size: sizeAjustado, font, color });
+      } else {
+        // Dos lineas: se acomodan centradas en el alto declarado de la caja
+        // (o, si el bloque de texto es mas alto que la caja, arrancando
+        // desde arriba para no invadir lo que esta por encima).
+        const lineHeightPt = sizeAjustado * 1.15;
+        const bloqueAltoPt = lineasTexto.length * lineHeightPt;
+        const extraPt = Math.max(0, (boxHPt - bloqueAltoPt) / 2);
+        let yCursorPt = pageHeightPt - boxYTopPt - extraPt - sizeAjustado * 0.78;
+        for (const linea of lineasTexto) {
+          page.drawText(linea, { x: xParaLinea(linea), y: yCursorPt, size: sizeAjustado, font, color });
+          yCursorPt -= lineHeightPt;
+        }
+      }
       continue;
     }
 
