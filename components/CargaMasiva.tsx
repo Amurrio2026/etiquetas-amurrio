@@ -205,12 +205,17 @@ function Metrica({ etiqueta, valor, destacado }: { etiqueta: string; valor: numb
 
 function ListaDetalle({ titulo, skus }: { titulo: string; skus: string[] }) {
   if (skus.length === 0) return null;
+  // Los codigos se muestran directamente (sin tener que hacer click en
+  // ningun lado) -- para listas largas, el contenedor scrollea en vez de
+  // ocupar toda la pantalla.
   return (
-    <details className="text-xs text-gray-600">
-      <summary className="cursor-pointer font-medium text-gray-700">
+    <div className="text-xs text-gray-600">
+      <p className="font-medium text-gray-700">
         {titulo} ({skus.length})
-      </summary>
-      <p className="mt-1 font-mono break-words">{skus.join(", ")}</p>
-    </details>
+      </p>
+      <p className={"mt-1 font-mono break-words" + (skus.length > 12 ? " max-h-28 overflow-y-auto pr-1" : "")}>
+        {skus.join(", ")}
+      </p>
+    </div>
   );
 }
