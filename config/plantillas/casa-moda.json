@@ -50,7 +50,7 @@
       "field": "articulo.precio_efectivo",
       "_nota": "RESUELTO (2026-09-04): precio_lista6 de la base (el que se cobra en caja), resuelto en lib/precios/resolver-precio.ts. Antes era igual a precio_lista como placeholder -- ya no.",
       "format": "moneda_ars_sin_decimales",
-      "x": 24.6, "baseline_y": 16.6, "w": 46,
+      "x": 24.6, "baseline_y": 14.1, "w": 46,
       "font": "extrabold", "size_pt": 23, "color": "ink", "align": "left"
     },
     {
@@ -72,7 +72,7 @@
       "field": "articulo.precio_lista",
       "_nota": "RESUELTO (2026-09-04): precio_lista2 (Ayacucho/Rauch/Madariaga) o precio_lista3 (resto), segun sucursal -- ver lib/precios/resolver-precio.ts.",
       "format": "moneda_ars_sin_decimales",
-      "x": 24.6, "baseline_y": 26.5, "w": 42,
+      "x": 24.6, "baseline_y": 24.5, "w": 42,
       "font": "extrabold", "size_pt": 21, "color": "ink", "align": "left"
     },
     {
@@ -85,7 +85,7 @@
       "id": "codigo",
       "type": "text",
       "template": "Código: {articulo.sku}",
-      "x": 4.94, "baseline_y": 31.6, "w": 45,
+      "x": 4.94, "baseline_y": 30.0, "w": 45,
       "font": "regular", "size_pt": 6, "color": "ink", "align": "left",
       "letter_spacing_mm": 0.3
     },
