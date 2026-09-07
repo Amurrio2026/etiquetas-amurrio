@@ -27,20 +27,20 @@
       "id": "titulo",
       "type": "text",
       "field": "articulo.descripcion",
-      "x": 3.5, "y": 1.0, "w": 73, "h": 4.5,
+      "x": 3.5, "y": 2.0, "w": 73, "h": 4.5,
       "font": "regular", "size_pt": 7.5, "color": "ink",
       "align": "center", "valign": "top"
     },
     {
       "id": "linea_1",
       "type": "rule_con_puntas",
-      "y": 6.17, "x0": 3.49, "x1": 76.51,
+      "y": 7.17, "x0": 3.49, "x1": 76.51,
       "color": "grey", "grosor_pt": 0.5, "puntas": false
     },
     {
       "id": "pill_efectivo",
       "type": "pill",
-      "x": 4.34, "y": 9.45, "w": 18.73, "h": 3.96,
+      "x": 4.34, "y": 10.45, "w": 18.73, "h": 3.96,
       "fill": "grey",
       "label": { "text": "Precio Efectivo", "font": "bold", "size_pt": 6, "color": "ink" }
     },
@@ -50,19 +50,19 @@
       "field": "articulo.precio_efectivo",
       "_nota": "RESUELTO (2026-09-04): precio_lista6 de la base (el que se cobra en caja), resuelto en lib/precios/resolver-precio.ts. Antes era igual a precio_lista como placeholder -- ya no.",
       "format": "moneda_ars_sin_decimales",
-      "x": 24.6, "baseline_y": 14.1, "w": 46,
+      "x": 24.6, "baseline_y": 15.1, "w": 46,
       "font": "extrabold", "size_pt": 23, "color": "ink", "align": "left"
     },
     {
       "id": "linea_2",
       "type": "rule_con_puntas",
-      "y": 16.93, "x0": 3.49, "x1": 76.51,
+      "y": 17.93, "x0": 3.49, "x1": 76.51,
       "color": "grey", "grosor_pt": 0.5, "puntas": false
     },
     {
       "id": "pill_lista",
       "type": "pill",
-      "x": 4.34, "y": 20.04, "w": 18.73, "h": 3.92,
+      "x": 4.34, "y": 21.04, "w": 18.73, "h": 3.92,
       "fill": "grey",
       "label": { "text": "Precio de Lista", "font": "bold", "size_pt": 6, "color": "ink" }
     },
@@ -72,27 +72,27 @@
       "field": "articulo.precio_lista",
       "_nota": "RESUELTO (2026-09-04): precio_lista2 (Ayacucho/Rauch/Madariaga) o precio_lista3 (resto), segun sucursal -- ver lib/precios/resolver-precio.ts.",
       "format": "moneda_ars_sin_decimales",
-      "x": 24.6, "baseline_y": 24.5, "w": 42,
+      "x": 24.6, "baseline_y": 25.5, "w": 42,
       "font": "extrabold", "size_pt": 21, "color": "ink", "align": "left"
     },
     {
       "id": "linea_3",
       "type": "rule_con_puntas",
-      "y": 26.99, "x0": 3.49, "x1": 76.51,
+      "y": 27.99, "x0": 3.49, "x1": 76.51,
       "color": "grey", "grosor_pt": 0.5, "puntas": false
     },
     {
       "id": "codigo",
       "type": "text",
       "template": "Código: {articulo.sku}",
-      "x": 4.94, "baseline_y": 30.0, "w": 45,
+      "x": 4.94, "baseline_y": 31.0, "w": 45,
       "font": "regular", "size_pt": 6, "color": "ink", "align": "left",
       "letter_spacing_mm": 0.3
     },
     {
       "id": "pill_legal",
       "type": "pill",
-      "x": 3.63, "y": 31.96, "w": 39.66, "h": 3.14,
+      "x": 3.63, "y": 32.96, "w": 39.66, "h": 3.14,
       "fill": "ink",
       "label": {
         "text": "Los precios incluyen impuestos nacionales.",
@@ -104,7 +104,7 @@
       "type": "image",
       "asset": "logos/casa-moda.png",
       "align_right_margin_mm": 3.5,
-      "align_bottom_margin_mm": 2.9,
+      "align_bottom_margin_mm": 1.9,
       "w": 26.7, "h": 3.45
     }
   ],
