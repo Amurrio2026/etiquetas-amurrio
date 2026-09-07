@@ -132,6 +132,63 @@ function ajustarTextoACaja(
   return { lineas, size };
 }
 
+/** Dibuja una linea punteada entre dos puntos (usada para la guia de corte). */
+function dibujarLineaPunteada(
+  page: PDFPage,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  color: RGB,
+  grosorPt: number,
+  largoPt: number,
+  huecoPt: number
+) {
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  const largoTotal = Math.hypot(dx, dy);
+  if (largoTotal === 0) return;
+  const ux = dx / largoTotal;
+  const uy = dy / largoTotal;
+  let recorrido = 0;
+  while (recorrido < largoTotal) {
+    const finRecorrido = Math.min(recorrido + largoPt, largoTotal);
+    page.drawLine({
+      start: { x: x0 + ux * recorrido, y: y0 + uy * recorrido },
+      end: { x: x0 + ux * finRecorrido, y: y0 + uy * finRecorrido },
+      thickness: grosorPt,
+      color,
+    });
+    recorrido += largoPt + huecoPt;
+  }
+}
+
+const GUIA_CORTE_COLOR = rgb(0.65, 0.65, 0.65);
+const GUIA_CORTE_GROSOR_PT = 0.4;
+const GUIA_CORTE_DASH_MM = 1.2;
+const GUIA_CORTE_HUECO_MM = 0.9;
+
+/**
+ * Dibuja un recuadro punteado alrededor de toda la etiqueta, a modo de
+ * guia de corte -- pedido de Lucila (2026-09-07) para que el personal de
+ * cada local sepa por donde recortar la hoja impresa y ponerla en el
+ * portaprecios. Se dibuja siempre, para cualquier marca/formato, despues
+ * del contenido de la etiqueta (queda por encima, bien visible).
+ */
+function dibujarGuiaCorte(page: PDFPage, pageHeightPt: number, offsetXMm: number, offsetYMm: number, anchoMm: number, altoMm: number) {
+  const x0 = mm(offsetXMm);
+  const x1 = mm(offsetXMm + anchoMm);
+  const yTop = pageHeightPt - mm(offsetYMm);
+  const yBottom = pageHeightPt - mm(offsetYMm + altoMm);
+  const dashPt = mm(GUIA_CORTE_DASH_MM);
+  const huecoPt = mm(GUIA_CORTE_HUECO_MM);
+
+  dibujarLineaPunteada(page, x0, yTop, x1, yTop, GUIA_CORTE_COLOR, GUIA_CORTE_GROSOR_PT, dashPt, huecoPt); // arriba
+  dibujarLineaPunteada(page, x0, yBottom, x1, yBottom, GUIA_CORTE_COLOR, GUIA_CORTE_GROSOR_PT, dashPt, huecoPt); // abajo
+  dibujarLineaPunteada(page, x0, yTop, x0, yBottom, GUIA_CORTE_COLOR, GUIA_CORTE_GROSOR_PT, dashPt, huecoPt); // izquierda
+  dibujarLineaPunteada(page, x1, yTop, x1, yBottom, GUIA_CORTE_COLOR, GUIA_CORTE_GROSOR_PT, dashPt, huecoPt); // derecha
+}
+
 /** Rectangulo con puntas redondeadas ("pildora"), aproximado con 2 circulos + un rectangulo central. */
 function dibujarPildora(page: PDFPage, xPt: number, yTopPt: number, wPt: number, hPt: number, color: RGB, pageHeightPt: number) {
   const yBottomPt = pageHeightPt - (yTopPt + hPt);
@@ -323,6 +380,7 @@ export async function generarPdf({ lineas, formato, plantilla }: OpcionesGenerar
       const offsetXMm = formato.margenXMm + pos.columna * (plantilla.label.width_mm + formato.espacioXMm);
       const offsetYMm = formato.margenYMm + pos.fila * (plantilla.label.height_mm + formato.espacioYMm);
       await dibujarEtiqueta(page, pageHeightPt, offsetXMm, offsetYMm, plantilla, pos.articulo, fuentes, logoImg);
+      dibujarGuiaCorte(page, pageHeightPt, offsetXMm, offsetYMm, plantilla.label.width_mm, plantilla.label.height_mm);
     }
   }
 
