@@ -61,6 +61,11 @@ export interface FormatoHoja {
   margenYMm: number;
   espacioXMm: number;
   espacioYMm: number;
+  /** Si se indica, el formato solo aplica a esa marca (evita, p.ej., usar un
+   * formato pensado para la etiqueta grande de Grand Bazaar con la etiqueta
+   * mas chica de Casa Moda, dejando espacio en blanco de mas en la hoja).
+   * Si se omite, el formato se ofrece para cualquier marca. */
+  marca?: string;
 }
 
 export interface PlantillaElemento {

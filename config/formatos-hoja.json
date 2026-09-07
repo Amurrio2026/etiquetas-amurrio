@@ -9,7 +9,9 @@
     "margenXMm": 5,
     "margenYMm": 22.5,
     "espacioXMm": 4,
-    "espacioYMm": 3
+    "espacioYMm": 3,
+    "marca": "Grand Bazaar",
+    "_nota": "Medidas calculadas para llenar la hoja A4 exacto con la etiqueta de Grand Bazaar (98x48mm): 2x98+4+2x5=210, 5x48+4x3+2x22.5=297."
   },
   {
     "id": "a4-1x5",
@@ -21,6 +23,22 @@
     "margenXMm": 56,
     "margenYMm": 22.5,
     "espacioXMm": 0,
-    "espacioYMm": 3
+    "espacioYMm": 3,
+    "marca": "Grand Bazaar",
+    "_nota": "Tambien calculado para la etiqueta de Grand Bazaar (98mm de ancho): 98+2x56=210."
+  },
+  {
+    "id": "a4-2x7-casamoda",
+    "nombre": "A4 - 2 columnas x 7 filas (14 etiquetas)",
+    "hojaAnchoMm": 210,
+    "hojaAltoMm": 297,
+    "columnas": 2,
+    "filas": 7,
+    "margenXMm": 23,
+    "margenYMm": 6.5,
+    "espacioXMm": 4,
+    "espacioYMm": 3,
+    "marca": "Casa Moda",
+    "_nota": "2026-09-07: reemplaza a4-2x5 para Casa Moda -- ese formato estaba pensado para la etiqueta mas grande de Grand Bazaar y dejaba mucho espacio en blanco con la etiqueta de Casa Moda (80x38mm, mas chica). Calculado para llenar la hoja: 2x80+4+2x23=210, 7x38+6x3+2x6.5=297. Pasa de 10 a 14 etiquetas por hoja."
   }
 ]

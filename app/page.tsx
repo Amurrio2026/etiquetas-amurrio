@@ -47,7 +47,6 @@ export default function Home() {
       .then((r) => r.json())
       .then((data: FormatoHoja[]) => {
         setFormatos(data);
-        if (data.length > 0) setFormatoId(data[0].id);
       })
       .catch(() => setAviso({ tipo: "error", texto: "No se pudieron cargar los formatos de hoja." }));
   }, []);
@@ -56,6 +55,22 @@ export default function Home() {
     () => sucursales.find((s) => s.codigoSucursal === sucursalCodigo) ?? null,
     [sucursales, sucursalCodigo]
   );
+
+  // Solo se ofrecen los formatos pensados para la marca de la sucursal elegida
+  // (o formatos sin marca especifica, validos para cualquiera) -- evita, p.ej.,
+  // que a Casa Moda le quede seleccionado un formato pensado para la etiqueta
+  // mas grande de Grand Bazaar, que deja espacio en blanco de mas en la hoja.
+  const formatosDisponibles = useMemo(
+    () => formatos.filter((f) => !f.marca || f.marca === sucursalActual?.marca),
+    [formatos, sucursalActual]
+  );
+
+  useEffect(() => {
+    if (formatosDisponibles.length === 0) return;
+    if (!formatosDisponibles.some((f) => f.id === formatoId)) {
+      setFormatoId(formatosDisponibles[0].id);
+    }
+  }, [formatosDisponibles, formatoId]);
 
   function cambiarModo(nuevo: Modo) {
     setModo(nuevo);
@@ -241,7 +256,7 @@ export default function Home() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <SelectorSucursal sucursales={sucursales} valor={sucursalCodigo} onCambiar={setSucursalCodigo} />
-            <SelectorFormato formatos={formatos} valor={formatoId} onCambiar={setFormatoId} />
+            <SelectorFormato formatos={formatosDisponibles} valor={formatoId} onCambiar={setFormatoId} />
           </div>
           <label className="block">
             <span className="text-xs font-semibold text-gray-700">Tu nombre (para el historial)</span>
