@@ -6,9 +6,10 @@ import ListadoEtiquetas, { type LineaUI } from "@/components/ListadoEtiquetas";
 import SelectorSucursal from "@/components/SelectorSucursal";
 import SelectorFormato from "@/components/SelectorFormato";
 import CargaMasiva, { type ResultadoValidacion } from "@/components/CargaMasiva";
+import PorContenedor from "@/components/PorContenedor";
 import type { ArticuloConPrecio, FormatoHoja, Sucursal } from "@/types";
 
-type Modo = "escaneo" | "masivo";
+type Modo = "escaneo" | "masivo" | "contenedor";
 
 function formatearPrecio(v: number | null): string {
   return v === null ? "sin precio cargado" : `$${Math.round(v).toLocaleString("es-AR")}`;
@@ -29,6 +30,7 @@ export default function Home() {
   const [aviso, setAviso] = useState<{ tipo: "error" | "info" | "ok"; texto: string } | null>(null);
 
   const [resultadoMasivo, setResultadoMasivo] = useState<ResultadoValidacion | null>(null);
+  const [resultadoContenedor, setResultadoContenedor] = useState<ResultadoValidacion | null>(null);
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [generando, setGenerando] = useState(false);
@@ -137,11 +139,13 @@ export default function Home() {
 
   function lineasParaApi() {
     if (modo === "masivo") return resultadoMasivo?.lineasValidas ?? [];
+    if (modo === "contenedor") return resultadoContenedor?.lineasValidas ?? [];
     return lineas.map((l) => ({ sku: l.articulo.sku, cantidad: l.cantidad }));
   }
 
   function hayAlgoParaGenerar() {
     if (modo === "masivo") return (resultadoMasivo?.resumen.encontrados ?? 0) > 0;
+    if (modo === "contenedor") return (resultadoContenedor?.resumen.encontrados ?? 0) > 0;
     return lineas.length > 0;
   }
 
@@ -290,6 +294,16 @@ export default function Home() {
           >
             Carga masiva
           </button>
+          <button
+            type="button"
+            onClick={() => cambiarModo("contenedor")}
+            className={
+              "rounded-md px-4 py-1.5 text-sm font-medium " +
+              (modo === "contenedor" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100")
+            }
+          >
+            Por contenedor
+          </button>
         </div>
 
         {modo === "escaneo" ? (
@@ -336,11 +350,18 @@ export default function Home() {
 
             <ListadoEtiquetas lineas={lineas} onCambiarCantidad={cambiarCantidad} onEliminar={eliminarLinea} />
           </>
-        ) : (
+        ) : modo === "masivo" ? (
           <CargaMasiva
             sucursalCodigo={sucursalCodigo}
             resultado={resultadoMasivo}
             onResultado={setResultadoMasivo}
+            onError={(texto) => setAviso({ tipo: "error", texto })}
+          />
+        ) : (
+          <PorContenedor
+            sucursalCodigo={sucursalCodigo}
+            resultado={resultadoContenedor}
+            onResultado={setResultadoContenedor}
             onError={(texto) => setAviso({ tipo: "error", texto })}
           />
         )}

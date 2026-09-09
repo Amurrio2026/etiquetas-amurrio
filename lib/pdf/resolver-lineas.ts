@@ -1,4 +1,9 @@
-import { buscarArticuloPorSku, buscarArticulosPorSkus } from "@/lib/db/articulos.repository";
+import {
+  buscarArticuloPorSku,
+  buscarArticulosPorSkus,
+  buscarArticulosPorContenedor,
+  normalizarCodigoContenedor,
+} from "@/lib/db/articulos.repository";
 import { resolverPrecios } from "@/lib/precios/resolver-precio";
 import type { LineaEtiqueta, Sucursal } from "@/types";
 
@@ -93,4 +98,39 @@ export async function resolverLineasMasivo(
   }
 
   return { lineas, faltantes, sinPrecio, precioParcial, inactivosODiscontinuados };
+}
+
+/**
+ * Para la carga "Por contenedor": busca TODOS los articulos que llegaron en
+ * un contenedor (ver buscarArticulosPorContenedor) y genera 1 etiqueta por
+ * cada uno (no hay cantidad para pedir -- a diferencia de escaneo/carga
+ * masiva, acá no hay "faltantes" posibles: todo lo que se encuentra por
+ * contenedor existe por definición). Mismo criterio que el resto para
+ * precios en blanco e inactivos/discontinuados.
+ */
+export async function resolverLineasPorContenedor(
+  codigoContenedorCrudo: string,
+  sucursal: Sucursal
+): Promise<ResultadoResolverLineas & { inactivosODiscontinuados: string[]; codigoContenedor: string }> {
+  const codigoContenedor = normalizarCodigoContenedor(codigoContenedorCrudo);
+  const lineas: LineaEtiqueta[] = [];
+  const sinPrecio: string[] = [];
+  const precioParcial: string[] = [];
+  const inactivosODiscontinuados: string[] = [];
+
+  const articulos = codigoContenedor ? await buscarArticulosPorContenedor(codigoContenedor) : [];
+
+  for (const articulo of articulos) {
+    if (!articulo.activo || articulo.discontinuado) inactivosODiscontinuados.push(articulo.sku);
+
+    const { precioEfectivo, precioLista } = resolverPrecios(articulo, sucursal);
+    if (precioEfectivo === null && precioLista === null) {
+      sinPrecio.push(articulo.sku);
+      continue;
+    }
+    if (precioEfectivo === null || precioLista === null) precioParcial.push(articulo.sku);
+    lineas.push({ articulo: { ...articulo, precioEfectivo, precioLista }, cantidad: 1 });
+  }
+
+  return { lineas, faltantes: [], sinPrecio, precioParcial, inactivosODiscontinuados, codigoContenedor };
 }

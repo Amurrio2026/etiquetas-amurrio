@@ -12,7 +12,7 @@ interface CuerpoEnvio {
   sucursalCodigo: number;
   formatoId: string;
   usuario: string;
-  origen?: "escaneo" | "masivo";
+  origen?: "escaneo" | "masivo" | "contenedor";
   lineas: LineaPedida[];
 }
 
@@ -42,7 +42,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `${sucursal.nombre} no tiene un mail configurado todavía` }, { status: 400 });
   }
 
-  const origen = cuerpo.origen === "masivo" ? "masivo" : "escaneo";
+  const origen: "escaneo" | "masivo" | "contenedor" =
+    cuerpo.origen === "masivo" ? "masivo" : cuerpo.origen === "contenedor" ? "contenedor" : "escaneo";
 
   const { lineas, faltantes, sinPrecio, precioParcial } = await resolverLineas(cuerpo.lineas, sucursal);
   if (lineas.length === 0) {

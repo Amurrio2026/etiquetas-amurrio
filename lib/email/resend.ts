@@ -9,8 +9,9 @@ export interface DatosEnvioEtiquetas {
   totalEtiquetas: number;
   pdfBytes: Uint8Array;
   nombrePdf: string;
-  /** "escaneo" (uno por uno) o "masivo" (carga de archivo) -- solo cambia el asunto/cuerpo del mail. */
-  origen: "escaneo" | "masivo";
+  /** "escaneo" (uno por uno), "masivo" (carga de archivo) o "contenedor" (por número de
+   * contenedor) -- solo cambia el asunto/cuerpo del mail. */
+  origen: "escaneo" | "masivo" | "contenedor";
 }
 
 function esModoPrueba(): boolean {
@@ -30,11 +31,12 @@ function destinatarioReal(sucursal: Sucursal): { email: string; prueba: boolean 
 const ETIQUETA_ORIGEN: Record<DatosEnvioEtiquetas["origen"], string> = {
   escaneo: "Escaneo",
   masivo: "Carga masiva",
+  contenedor: "Por contenedor",
 };
 
 function armarAsunto(datos: DatosEnvioEtiquetas, prueba: boolean): string {
-  const origen = datos.origen === "masivo" ? " - Carga masiva" : "";
-  const base = `Etiquetas de artículos - Sucursal ${datos.sucursal.nombre}${origen} - ${datos.fecha}`;
+  const sufijo = datos.origen === "escaneo" ? "" : ` - ${ETIQUETA_ORIGEN[datos.origen]}`;
+  const base = `Etiquetas de artículos - Sucursal ${datos.sucursal.nombre}${sufijo} - ${datos.fecha}`;
   return prueba ? `[PRUEBA] ${base}` : base;
 }
 

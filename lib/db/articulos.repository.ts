@@ -1,5 +1,5 @@
 import { getPool, tieneBaseReal } from "@/lib/db/client";
-import { ARTICULOS_MOCK, buscarArticuloMock } from "@/lib/mock/articulos";
+import { ARTICULOS_MOCK, buscarArticuloMock, buscarArticulosMockPorContenedor } from "@/lib/mock/articulos";
 import type { Articulo } from "@/types";
 
 const TTL_MS = 5 * 60 * 1000; // 5 minutos, ver arquitectura: "cache refrescada cada pocos minutos"
@@ -90,6 +90,67 @@ export async function buscarArticulosPorSkus(skus: string[]): Promise<Map<string
     if (articulo) resultado.set(codigo, articulo);
   }
   return resultado;
+}
+
+/**
+ * Normaliza lo que Lucila anota como "número de contenedor" para poder
+ * buscarlo: mayúsculas, solo letras/números, y le agrega el prefijo "BYM"
+ * si no lo puso (así "292" y "BYM292" buscan lo mismo -- todos los
+ * contenedores de Amurrio usan ese prefijo, ver comex.contenedor). Devuelve
+ * "" si no queda nada útil.
+ */
+export function normalizarCodigoContenedor(input: string): string {
+  const limpio = input.trim().toUpperCase().replace(/[^0-9A-Z]/g, "");
+  if (!limpio) return "";
+  return limpio.startsWith("BYM") ? limpio : `BYM${limpio}`;
+}
+
+/**
+ * Busca todos los articulos de un contenedor, vía el campo "familia" del
+ * maestro (maestros.articulos.familia -- "es el contenedor en el que arriba
+ * la mercadería", ver DISENO_BBDD_AZURE §4.1). Se probó contra la base real
+ * (2026-09-09): el campo NO tiene un formato 100% consistente ("BYM292 -
+ * AGOSTO 2026", "BYM130-JUNIO2022", a veces solo "BYM"), así que se
+ * matchea por el código al PRINCIPIO del valor seguido de un caracter que
+ * no sea alfanumérico (o el final del texto) -- para que "292" no matchee
+ * "2920" ni el "29" de "BYM29X", pero sí encuentre cualquier variante de
+ * sufijo/fecha que seguía al código real.
+ *
+ * OJO: se probó también cruzar por comex.pedido_contenedor (el seguimiento
+ * de contenedores en tránsito), pero esa tabla vive en un schema aparte que
+ * la documentación de la base marca como "en construcción, tratar con
+ * cautela", y su código de línea (ej. "BYM1552-01") NO matchea directo con
+ * el sku de maestros.articulos -- requeriría el mismo backfill manual que
+ * usa Ana, nada confiable para algo que termina impreso en una etiqueta de
+ * precio. "familia" vive en la tabla de artículos de siempre, sin cruces.
+ */
+export async function buscarArticulosPorContenedor(codigoContenedorCrudo: string): Promise<Articulo[]> {
+  const codigo = normalizarCodigoContenedor(codigoContenedorCrudo);
+  if (!codigo) return [];
+
+  if (!tieneBaseReal()) return buscarArticulosMockPorContenedor(codigo);
+
+  const pool = getPool()!;
+  const patron = `^${codigo}([^0-9A-Za-z]|$)`;
+  const { rows } = await pool.query(
+    `select sku, descripcion, categoria, marca, precio_lista2, precio_lista3, precio_lista6, activo, discontinuado
+       from maestros.articulos
+      where descripcion is not null
+        and familia ~* $1`,
+    [patron]
+  );
+
+  return rows.map((r) => ({
+    sku: r.sku,
+    descripcion: r.descripcion,
+    categoria: r.categoria,
+    marcaProducto: r.marca,
+    precioLista2: r.precio_lista2 != null ? Number(r.precio_lista2) : null,
+    precioLista3: r.precio_lista3 != null ? Number(r.precio_lista3) : null,
+    precioLista6: r.precio_lista6 != null ? Number(r.precio_lista6) : null,
+    activo: Boolean(r.activo),
+    discontinuado: Boolean(r.discontinuado),
+  }));
 }
 
 export function usandoDatosDeEjemplo(): boolean {

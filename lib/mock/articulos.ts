@@ -93,3 +93,23 @@ export function buscarArticuloMock(sku: string): Articulo | null {
   const limpio = sku.trim();
   return ARTICULOS_MOCK.find((a) => a.sku === limpio) ?? null;
 }
+
+/**
+ * "familia" (el contenedor de arribo) no es parte del tipo Articulo -- solo
+ * se usa para resolver la carga "Por contenedor" -- así que en el mock vive
+ * en un mapa aparte en vez de agregarle un campo a todo ARTICULOS_MOCK.
+ * Sirve para probar el flujo completo sin DATABASE_URL: buscar "292" o
+ * "BYM292" encuentra estos dos artículos de ejemplo.
+ */
+const FAMILIA_MOCK: Record<string, string> = {
+  "092626528020": "BYM292 - AGOSTO 2026",
+  "7798323772805": "BYM292 - AGOSTO 2026",
+};
+
+export function buscarArticulosMockPorContenedor(codigoNormalizado: string): Articulo[] {
+  const patron = new RegExp(`^${codigoNormalizado}([^0-9A-Za-z]|$)`, "i");
+  return ARTICULOS_MOCK.filter((a) => {
+    const familia = FAMILIA_MOCK[a.sku];
+    return familia ? patron.test(familia) : false;
+  });
+}
