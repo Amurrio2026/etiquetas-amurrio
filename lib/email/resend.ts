@@ -80,7 +80,10 @@ export async function enviarEtiquetasPorEmail(datos: DatosEnvioEtiquetas): Promi
 
   const resend = new Resend(apiKey);
   await resend.emails.send({
-    from: process.env.RESEND_FROM || "Etiquetas Amurrio <etiquetas@amurrio.com.ar>",
+    // Dominio verificado en Resend (2026-09-11): "etiquetas.amurrio.com.ar" (subdominio,
+    // para no tocar el mail real de la empresa en amurrio.com.ar) -- el remitente por
+    // defecto tiene que ser de ESE dominio exacto, sino Resend rechaza el envio.
+    from: process.env.RESEND_FROM || "Etiquetas Amurrio <etiquetas@etiquetas.amurrio.com.ar>",
     to: email,
     subject: asunto,
     html: cuerpo,

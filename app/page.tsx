@@ -36,6 +36,19 @@ export default function Home() {
   const [generando, setGenerando] = useState(false);
   const [enviando, setEnviando] = useState(false);
 
+  // Se usa solo para decidir si se muestra el iframe de vista previa del PDF
+  // (ver mas abajo, cerca de "Descargar PDF") -- arranca en false (asume
+  // desktop) para que el primer render coincida entre servidor y cliente, y
+  // se corrige apenas monta en el navegador.
+  const [esMobile, setEsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setEsMobile(mq.matches);
+    const escuchar = (e: MediaQueryListEvent) => setEsMobile(e.matches);
+    mq.addEventListener("change", escuchar);
+    return () => mq.removeEventListener("change", escuchar);
+  }, []);
+
   useEffect(() => {
     fetch("/api/sucursales")
       .then((r) => r.json())
@@ -384,8 +397,35 @@ export default function Home() {
         </div>
 
         {pdfUrl && (
-          <div className="rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
-            <iframe src={pdfUrl} className="w-full h-[70vh] rounded" title="Vista previa del PDF" />
+          <div className="rounded-lg border border-gray-200 bg-white p-2 shadow-sm space-y-2">
+            {/* Botones de descarga/apertura directa: en Chrome de Android la vista previa
+                de abajo (iframe con blob:) no siempre renderiza el PDF -- muestra una
+                tarjeta rota con un nombre de archivo al azar. Estos dos links sí funcionan
+                en cualquier navegador, mobile o desktop, y no dependen de esa vista previa. */}
+            <div className="flex flex-wrap gap-2 px-1 pt-1">
+              <a
+                href={pdfUrl}
+                download="etiquetas.pdf"
+                className="rounded-md bg-gray-900 text-white text-sm font-medium px-4 py-2 hover:bg-gray-700 inline-block"
+              >
+                Descargar PDF
+              </a>
+              <a
+                href={pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-md bg-white border border-gray-900 text-gray-900 text-sm font-medium px-4 py-2 hover:bg-gray-100 inline-block"
+              >
+                Abrir en pestaña nueva
+              </a>
+            </div>
+            {/* La vista previa embebida (iframe) solo se muestra en pantallas grandes.
+                En el celular, mostrarla automaticamente dispara en Chrome/Android un
+                cartel nativo "Abrir con..." que puede llegar a tapar la pantalla y
+                trabar la interaccion con el resto de la app -- pasó en la prueba real
+                con las sucursales (2026-09-16). Los dos botones de arriba sí funcionan
+                bien en cualquier dispositivo porque no se abren solos, hace falta tocarlos. */}
+            {!esMobile && <iframe src={pdfUrl} className="w-full h-[70vh] rounded" title="Vista previa del PDF" />}
           </div>
         )}
       </div>
