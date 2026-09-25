@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cargarPlantillaPorMarca, buscarFormatoHoja } from "@/lib/config";
+import { cargarPlantillaParaFormato, buscarFormatoHoja } from "@/lib/config";
 import { generarPdf } from "@/lib/pdf/generar-pdf";
 import { resolverLineas, type LineaPedida } from "@/lib/pdf/resolver-lineas";
 import { listarSucursalesActivas } from "@/lib/db/sucursales.repository";
@@ -35,10 +35,8 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const [plantilla, formato] = await Promise.all([
-      cargarPlantillaPorMarca(sucursal.marca),
-      buscarFormatoHoja(cuerpo.formatoId),
-    ]);
+    const formato = await buscarFormatoHoja(cuerpo.formatoId);
+    const plantilla = await cargarPlantillaParaFormato(sucursal.marca, formato);
 
     const pdfBytes = await generarPdf({ lineas, formato, plantilla });
 

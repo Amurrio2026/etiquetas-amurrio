@@ -40,5 +40,35 @@
     "espacioYMm": 3,
     "marca": "Casa Moda",
     "_nota": "2026-09-07: reemplaza a4-2x5 para Casa Moda -- ese formato estaba pensado para la etiqueta mas grande de Grand Bazaar y dejaba mucho espacio en blanco con la etiqueta de Casa Moda (80x38mm, mas chica). Calculado para llenar la hoja: 2x80+4+2x23=210, 7x38+6x3+2x6.5=297. Pasa de 10 a 14 etiquetas por hoja."
+  },
+  {
+    "id": "a4-6x5-blister-gb",
+    "nombre": "A4 - Blíster de pared 3x5,5cm (30 etiquetas) - Grand Bazaar",
+    "hojaAnchoMm": 210,
+    "hojaAltoMm": 297,
+    "columnas": 6,
+    "filas": 5,
+    "margenXMm": 7.5,
+    "margenYMm": 5,
+    "espacioXMm": 3,
+    "espacioYMm": 3,
+    "marca": "Grand Bazaar",
+    "plantillaId": "grand-bazaar-blister",
+    "_nota": "2026-09-25: nuevo tamaño 'Blister de pared' (3x5,5cm) pedido por Lucila, disponible para todas las sucursales de Grand Bazaar. Calculado para llenar la hoja: 6x30+5x3+2x7.5=210, 5x55+4x3+2x5=297."
+  },
+  {
+    "id": "a4-6x5-blister-cm",
+    "nombre": "A4 - Blíster de pared 3x5,5cm (30 etiquetas) - Casa Moda",
+    "hojaAnchoMm": 210,
+    "hojaAltoMm": 297,
+    "columnas": 6,
+    "filas": 5,
+    "margenXMm": 7.5,
+    "margenYMm": 5,
+    "espacioXMm": 3,
+    "espacioYMm": 3,
+    "marca": "Casa Moda",
+    "plantillaId": "casa-moda-blister",
+    "_nota": "2026-09-25: nuevo tamaño 'Blister de pared' (3x5,5cm) pedido por Lucila, disponible para todas las sucursales de Casa Moda. Misma cuenta que el de Grand Bazaar (la etiqueta mide igual, 3x5,5cm, en las dos marcas)."
   }
 ]

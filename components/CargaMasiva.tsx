@@ -15,6 +15,8 @@ export interface ResumenValidacion {
   totalEtiquetas: number;
   /** Solo lo llena /api/etiquetas/validar-contenedor (carga "Por contenedor"). */
   codigoContenedor?: string;
+  /** Solo lo llena /api/etiquetas/validar-proveedor (carga "Por contenedor" -> proveedor nacional). */
+  proveedor?: string;
 }
 
 export interface DetalleValidacion {

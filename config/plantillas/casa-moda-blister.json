@@ -1,0 +1,106 @@
+{
+  "id": "casa-moda-blister",
+  "marca": "Casa Moda",
+  "_fuente": "Diseño propio (2026-09-25) para el nuevo tamaño 3x5,5cm 'Blíster de pared' pedido por Lucila -- no hay PDF de referencia como en las otras plantillas, así que las medidas son una primera propuesta para validar impresa y ajustar si hace falta.",
+
+  "label": {
+    "width_mm": 30,
+    "height_mm": 55,
+    "background": "#FFFFFF"
+  },
+
+  "palette": {
+    "ink": "#231F20",
+    "grey": "#D1D3D4",
+    "white": "#FFFFFF"
+  },
+
+  "fonts": {
+    "regular": { "family": "Helvetica-Bold", "weight": 700 },
+    "bold": { "family": "Helvetica-Bold", "weight": 700 },
+    "extrabold": { "family": "Helvetica-Bold", "weight": 700 }
+  },
+
+  "elements": [
+    {
+      "id": "titulo",
+      "type": "text",
+      "field": "articulo.descripcion",
+      "x": 2, "y": 2, "w": 26, "h": 8,
+      "font": "regular", "size_pt": 6, "min_size_pt": 4.5, "color": "ink",
+      "align": "center", "valign": "top"
+    },
+    {
+      "id": "linea_1",
+      "type": "rule_con_puntas",
+      "y": 10.8, "x0": 2, "x1": 28,
+      "color": "grey", "grosor_pt": 0.4, "puntas": false
+    },
+    {
+      "id": "pill_efectivo",
+      "type": "pill",
+      "x": 2, "y": 12.6, "w": 14, "h": 3.5,
+      "fill": "grey",
+      "label": { "text": "Efectivo", "font": "bold", "size_pt": 4.5, "color": "ink" }
+    },
+    {
+      "id": "precio_efectivo",
+      "type": "text",
+      "field": "articulo.precio_efectivo",
+      "_nota": "precio_lista6 resuelto por sucursal, ver lib/precios/resolver-precio.ts -- igual que en el resto de las plantillas.",
+      "format": "moneda_ars_sin_decimales",
+      "x": 2, "baseline_y": 20.0, "w": 26,
+      "font": "extrabold", "size_pt": 12, "color": "ink", "align": "left"
+    },
+    {
+      "id": "linea_2",
+      "type": "rule_con_puntas",
+      "y": 23.2, "x0": 2, "x1": 28,
+      "color": "grey", "grosor_pt": 0.4, "puntas": false
+    },
+    {
+      "id": "pill_lista",
+      "type": "pill",
+      "x": 2, "y": 25.0, "w": 14, "h": 3.5,
+      "fill": "grey",
+      "label": { "text": "Lista", "font": "bold", "size_pt": 4.5, "color": "ink" }
+    },
+    {
+      "id": "precio_lista",
+      "type": "text",
+      "field": "articulo.precio_lista",
+      "_nota": "precio_lista2/lista3 segun sucursal, ver lib/precios/resolver-precio.ts -- igual que en el resto de las plantillas.",
+      "format": "moneda_ars_sin_decimales",
+      "x": 2, "baseline_y": 32.4, "w": 26,
+      "font": "extrabold", "size_pt": 12, "color": "ink", "align": "left"
+    },
+    {
+      "id": "linea_3",
+      "type": "rule_con_puntas",
+      "y": 35.6, "x0": 2, "x1": 28,
+      "color": "grey", "grosor_pt": 0.4, "puntas": false
+    },
+    {
+      "id": "codigo",
+      "type": "text",
+      "template": "Cód: {articulo.sku}",
+      "x": 2, "baseline_y": 39.6, "w": 26,
+      "font": "regular", "size_pt": 4.8, "color": "ink", "align": "left",
+      "letter_spacing_mm": 0.15
+    },
+    {
+      "id": "pill_legal",
+      "type": "pill",
+      "x": 2, "y": 47.5, "w": 26, "h": 5,
+      "fill": "ink",
+      "label": {
+        "text": "Precios c/imp. nacionales.",
+        "font": "regular", "size_pt": 4.3, "color": "white"
+      }
+    }
+  ],
+
+  "pendientes": [
+    "2026-09-25: primera version del 'Blister de pared' (3x5,5cm), sin PDF de referencia -- se omitio el logo por falta de espacio (label muy angosta). Pendiente de que Lucila vea una hoja impresa/generada y confirme tamaños de fuente y si quiere sumar el logo achicado."
+  ]
+}

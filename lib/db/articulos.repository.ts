@@ -1,5 +1,11 @@
 import { getPool, tieneBaseReal } from "@/lib/db/client";
-import { ARTICULOS_MOCK, buscarArticuloMock, buscarArticulosMockPorContenedor } from "@/lib/mock/articulos";
+import {
+  ARTICULOS_MOCK,
+  buscarArticuloMock,
+  buscarArticulosMockPorContenedor,
+  buscarArticulosMockPorProveedor,
+  listarProveedoresNacionalesMock,
+} from "@/lib/mock/articulos";
 import type { Articulo } from "@/types";
 
 const TTL_MS = 5 * 60 * 1000; // 5 minutos, ver arquitectura: "cache refrescada cada pocos minutos"
@@ -138,6 +144,85 @@ export async function buscarArticulosPorContenedor(codigoContenedorCrudo: string
       where descripcion is not null
         and familia ~* $1`,
     [patron]
+  );
+
+  return rows.map((r) => ({
+    sku: r.sku,
+    descripcion: r.descripcion,
+    categoria: r.categoria,
+    marcaProducto: r.marca,
+    precioLista2: r.precio_lista2 != null ? Number(r.precio_lista2) : null,
+    precioLista3: r.precio_lista3 != null ? Number(r.precio_lista3) : null,
+    precioLista6: r.precio_lista6 != null ? Number(r.precio_lista6) : null,
+    activo: Boolean(r.activo),
+    discontinuado: Boolean(r.discontinuado),
+  }));
+}
+
+/**
+ * Lista los nombres de proveedores nacionales disponibles para el selector
+ * de la pestaña "Por contenedor" -- son los valores de "familia" que NO son
+ * un código de contenedor (esos siempre empiezan con "BYM", ver
+ * normalizarCodigoContenedor). Se devuelven tal cual están cargados (sin
+ * agrupar variantes como "SOIFER (2012)" con "SOIFER"): agrupar a ciegas
+ * podría mezclar proveedores distintos que casualmente comparten el
+ * prefijo, así que se prefiere mostrar la lista real para elegir con
+ * precisión.
+ */
+export async function listarProveedoresNacionales(): Promise<string[]> {
+  if (!tieneBaseReal()) return listarProveedoresNacionalesMock();
+
+  const pool = getPool()!;
+  const { rows } = await pool.query(
+    `select distinct familia
+       from maestros.articulos
+      where familia is not null
+        and familia !~* '^\\s*BYM'
+      order by familia`
+  );
+  return rows.map((r) => r.familia as string);
+}
+
+/**
+ * Busca todos los articulos de un proveedor nacional (via "familia", igual
+ * que buscarArticulosPorContenedor pero por NOMBRE exacto en vez de código
+ * de contenedor -- ver listarProveedoresNacionales). Si se pasan fechas,
+ * solo devuelve los articulos cuyo precio (en la lista que efectivamente se
+ * imprime para esa sucursal: lista6 siempre + lista2 o lista3 segun
+ * corresponda) fue MODIFICADO dentro de ese rango, segun
+ * maestros.precios_historico.vigente_desde -- pedido de Lucila (2026-09-25)
+ * para proveedores con muchos articulos, donde no tiene sentido reimprimir
+ * TODO el catalogo cada vez.
+ */
+export async function buscarArticulosPorProveedor(
+  nombreProveedor: string,
+  listasAFiltrar: string[],
+  fechaDesde?: string,
+  fechaHasta?: string
+): Promise<Articulo[]> {
+  const nombre = nombreProveedor.trim();
+  if (!nombre) return [];
+
+  if (!tieneBaseReal()) return buscarArticulosMockPorProveedor(nombre);
+
+  const pool = getPool()!;
+  const hayRangoFechas = Boolean(fechaDesde && fechaHasta);
+
+  const { rows } = await pool.query(
+    `select sku, descripcion, categoria, marca, precio_lista2, precio_lista3, precio_lista6, activo, discontinuado
+       from maestros.articulos a
+      where descripcion is not null
+        and familia = $1
+        and (
+          $2 = false
+          or exists (
+            select 1 from maestros.precios_historico h
+             where h.sku = a.sku
+               and h.lista = any($3::text[])
+               and h.vigente_desde between $4::date and $5::date
+          )
+        )`,
+    [nombre, hayRangoFechas, listasAFiltrar, fechaDesde ?? null, fechaHasta ?? null]
   );
 
   return rows.map((r) => ({

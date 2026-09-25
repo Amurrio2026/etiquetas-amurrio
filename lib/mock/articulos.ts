@@ -113,3 +113,21 @@ export function buscarArticulosMockPorContenedor(codigoNormalizado: string): Art
     return familia ? patron.test(familia) : false;
   });
 }
+
+/**
+ * "familia" tambien puede ser el nombre de un proveedor nacional (no un
+ * contenedor) -- ver lib/db/articulos.repository.ts. Se agregan 2 ejemplos
+ * mock para poder probar ese flujo sin DATABASE_URL.
+ */
+const PROVEEDOR_MOCK: Record<string, string> = {
+  "7782271073015": "CAROL",
+  "6942138946529": "CAROL",
+};
+
+export function listarProveedoresNacionalesMock(): string[] {
+  return Array.from(new Set(Object.values(PROVEEDOR_MOCK))).sort();
+}
+
+export function buscarArticulosMockPorProveedor(nombreProveedor: string): Articulo[] {
+  return ARTICULOS_MOCK.filter((a) => PROVEEDOR_MOCK[a.sku] === nombreProveedor);
+}

@@ -66,6 +66,13 @@ export interface FormatoHoja {
    * mas chica de Casa Moda, dejando espacio en blanco de mas en la hoja).
    * Si se omite, el formato se ofrece para cualquier marca. */
   marca?: string;
+  /** Si se indica, este formato usa esa plantilla puntual (por id, ver
+   * config/plantillas/*.json) en vez de la plantilla "por defecto" de la
+   * marca de la sucursal. Se agrego (2026-09-25) para poder tener MAS DE UN
+   * tamaño de etiqueta por marca (ej: la etiqueta de siempre + el "Blister
+   * de pared" 3x5,5cm) sin romper los formatos existentes, que no lo tienen
+   * definido y siguen resolviendo la plantilla por marca como antes. */
+  plantillaId?: string;
 }
 
 export interface PlantillaElemento {

@@ -2,9 +2,10 @@ import {
   buscarArticuloPorSku,
   buscarArticulosPorSkus,
   buscarArticulosPorContenedor,
+  buscarArticulosPorProveedor,
   normalizarCodigoContenedor,
 } from "@/lib/db/articulos.repository";
-import { resolverPrecios } from "@/lib/precios/resolver-precio";
+import { resolverPrecios, listaParaSucursal } from "@/lib/precios/resolver-precio";
 import type { LineaEtiqueta, Sucursal } from "@/types";
 
 export interface LineaPedida {
@@ -133,4 +134,41 @@ export async function resolverLineasPorContenedor(
   }
 
   return { lineas, faltantes: [], sinPrecio, precioParcial, inactivosODiscontinuados, codigoContenedor };
+}
+
+/**
+ * Para la carga "Por contenedor" cuando se busca por PROVEEDOR NACIONAL en
+ * vez de código de contenedor (ver buscarArticulosPorProveedor). Si se
+ * pasan fechaDesde/fechaHasta, solo trae articulos cuyo precio (en las
+ * listas que realmente se imprimen para esta sucursal: lista6 siempre + la
+ * de "Lista" que corresponda) fue modificado en ese rango -- para no
+ * reimprimir todo el catalogo de proveedores con muchos articulos.
+ */
+export async function resolverLineasPorProveedor(
+  nombreProveedor: string,
+  sucursal: Sucursal,
+  fechaDesde: string | undefined,
+  fechaHasta: string | undefined
+): Promise<ResultadoResolverLineas & { inactivosODiscontinuados: string[] }> {
+  const listasAFiltrar = [listaParaSucursal(sucursal, "efectivo"), listaParaSucursal(sucursal, "lista")];
+  const lineas: LineaEtiqueta[] = [];
+  const sinPrecio: string[] = [];
+  const precioParcial: string[] = [];
+  const inactivosODiscontinuados: string[] = [];
+
+  const articulos = await buscarArticulosPorProveedor(nombreProveedor, listasAFiltrar, fechaDesde, fechaHasta);
+
+  for (const articulo of articulos) {
+    if (!articulo.activo || articulo.discontinuado) inactivosODiscontinuados.push(articulo.sku);
+
+    const { precioEfectivo, precioLista } = resolverPrecios(articulo, sucursal);
+    if (precioEfectivo === null && precioLista === null) {
+      sinPrecio.push(articulo.sku);
+      continue;
+    }
+    if (precioEfectivo === null || precioLista === null) precioParcial.push(articulo.sku);
+    lineas.push({ articulo: { ...articulo, precioEfectivo, precioLista }, cantidad: 1 });
+  }
+
+  return { lineas, faltantes: [], sinPrecio, precioParcial, inactivosODiscontinuados };
 }
