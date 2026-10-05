@@ -1,6 +1,7 @@
 "use client";
 
 import type { ArticuloConPrecio } from "@/types";
+import CampoCantidad from "./CampoCantidad";
 
 export interface LineaUI {
   articulo: ArticuloConPrecio;
@@ -58,11 +59,9 @@ export default function ListadoEtiquetas({ lineas, onCambiarCantidad, onEliminar
                       : `$${Math.round(l.articulo.precioLista).toLocaleString("es-AR")}`}
                   </td>
                   <td className="py-2 pr-2">
-                    <input
-                      type="number"
-                      min={1}
-                      value={l.cantidad}
-                      onChange={(e) => onCambiarCantidad(l.articulo.sku, Math.max(1, Number(e.target.value) || 1))}
+                    <CampoCantidad
+                      valor={l.cantidad}
+                      onCambiar={(n) => onCambiarCantidad(l.articulo.sku, n)}
                       className="w-16 rounded border border-gray-300 px-2 py-1 text-sm tabular-nums"
                     />
                   </td>
