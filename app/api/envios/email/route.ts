@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { cargarPlantillaParaFormato, buscarFormatoHoja } from "@/lib/config";
 import { generarPdf } from "@/lib/pdf/generar-pdf";
+import { esPrecioUnico } from "@/lib/precios/resolver-precio";
 import { totalEtiquetas } from "@/lib/pdf/paginar";
 import { resolverLineas, type LineaPedida } from "@/lib/pdf/resolver-lineas";
 import { listarSucursalesActivas } from "@/lib/db/sucursales.repository";
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
     const formato = await buscarFormatoHoja(cuerpo.formatoId);
     const plantilla = await cargarPlantillaParaFormato(sucursal.marca, formato);
 
-    const pdfBytes = await generarPdf({ lineas, formato, plantilla });
+    const pdfBytes = await generarPdf({ lineas, formato, plantilla, precioUnico: esPrecioUnico(sucursal) });
     const { fecha, hora } = fechaHoraAr();
     const idPedido = randomUUID();
     const nombrePdf = `etiquetas_${sucursal.nombre.replace(/\s+/g, "")}_${fecha.replaceAll("/", "-")}_${idPedido.slice(0, 8)}.pdf`;
