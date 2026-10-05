@@ -152,11 +152,25 @@ function resolverCodigo(mapa: Map<string, Articulo>, codigo: string): Articulo |
 }
 
 /**
+ * Algunos lectores anteponen un "identificador de simbologia" AIM al codigo leido:
+ * "]" + una letra + un caracter (ej. "]C1" = Code 128, "]E0" = EAN-13, "]A0" = Code 39).
+ * Caso real (2026-10-05): al escanear BYM1131280 llegaba "]C1BYM1131280" y no se encontraba.
+ * Tambien se sacan caracteres de control y espacios de los costados.
+ */
+export function limpiarCodigoEscaneado(crudo: string): string {
+  return crudo
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .trim()
+    .replace(/^\][A-Za-z][0-9A-Za-z]/, "")
+    .trim();
+}
+
+/**
  * Busca un articulo por el codigo escaneado/tipeado: sku o, si no matchea,
  * codigo de barra (ver resolverCodigo). Devuelve null si no existe.
  */
 export async function buscarArticuloPorSku(sku: string): Promise<Articulo | null> {
-  const codigo = sku.replace(/[\u0000-\u001f\u007f]/g, "").trim();
+  const codigo = limpiarCodigoEscaneado(sku);
   if (!codigo) return null;
 
   if (!tieneBaseReal()) return buscarArticuloMock(codigo);
@@ -175,7 +189,7 @@ export async function buscarArticulosPorSkus(skus: string[]): Promise<Map<string
   const mapa = tieneBaseReal() ? await obtenerCache() : cargarCacheMock();
   const resultado = new Map<string, Articulo>();
   for (const skuCrudo of skus) {
-    const codigo = skuCrudo.trim();
+    const codigo = limpiarCodigoEscaneado(skuCrudo);
     if (!codigo) continue;
     const articulo = resolverCodigo(mapa, codigo);
     if (articulo) resultado.set(codigo, articulo);
