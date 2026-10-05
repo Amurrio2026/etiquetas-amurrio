@@ -207,9 +207,24 @@ async function dibujarEtiqueta(
   plantilla: Plantilla,
   articulo: ArticuloConPrecio,
   fuentes: JuegoFuentes,
-  logoImg: Awaited<ReturnType<PDFDocument["embedPng"]>> | null
+  logoImg: Awaited<ReturnType<PDFDocument["embedPng"]>> | null,
+  precioUnico: boolean
 ) {
-  for (const el of plantilla.elements as (PlantillaElemento & Record<string, any>)[]) {
+  // Sucursales de precio unico (Rauch, Ayacucho, Madariaga): se saltean los elementos
+  // marcados "solo_dos_precios" (bloque Efectivo) y el bloque de Lista se corre
+  // "dy_precio_unico" mm para quedar centrado en el espacio que deja libre.
+  const elementos = (plantilla.elements as (PlantillaElemento & Record<string, any>)[]).flatMap((e) => {
+    if (!precioUnico) return [e];
+    if (e.solo_dos_precios) return [];
+    const dy = Number(e.dy_precio_unico ?? 0);
+    if (!dy) return [e];
+    const movido: PlantillaElemento & Record<string, any> = { ...e };
+    if (typeof e.y === "number") movido.y = e.y + dy;
+    if (typeof e.baseline_y === "number") movido.baseline_y = e.baseline_y + dy;
+    return [movido];
+  });
+
+  for (const el of elementos) {
     if (el.type === "rect") {
       const xPt = mm(offsetXMm + el.x);
       const yTopPt = mm(offsetYMm + el.y);
@@ -348,13 +363,15 @@ export interface OpcionesGenerarPdf {
   lineas: LineaEtiqueta[];
   formato: FormatoHoja;
   plantilla: Plantilla;
+  /** true = sucursal de precio unico: la etiqueta muestra solo el precio de Lista. */
+  precioUnico?: boolean;
 }
 
 /**
  * Genera el PDF completo: reparte las etiquetas en hojas segun el formato
  * elegido y dibuja cada una con la plantilla de la marca correspondiente.
  */
-export async function generarPdf({ lineas, formato, plantilla }: OpcionesGenerarPdf): Promise<Uint8Array> {
+export async function generarPdf({ lineas, formato, plantilla, precioUnico = false }: OpcionesGenerarPdf): Promise<Uint8Array> {
   const hojas: Hoja[] = paginarEtiquetas(lineas, formato);
   if (hojas.length === 0) throw new Error("No hay etiquetas para generar");
 
@@ -380,7 +397,7 @@ export async function generarPdf({ lineas, formato, plantilla }: OpcionesGenerar
     for (const pos of hoja) {
       const offsetXMm = formato.margenXMm + pos.columna * (plantilla.label.width_mm + formato.espacioXMm);
       const offsetYMm = formato.margenYMm + pos.fila * (plantilla.label.height_mm + formato.espacioYMm);
-      await dibujarEtiqueta(page, pageHeightPt, offsetXMm, offsetYMm, plantilla, pos.articulo, fuentes, logoImg);
+      await dibujarEtiqueta(page, pageHeightPt, offsetXMm, offsetYMm, plantilla, pos.articulo, fuentes, logoImg, precioUnico);
       dibujarGuiaCorte(page, pageHeightPt, offsetXMm, offsetYMm, plantilla.label.width_mm, plantilla.label.height_mm);
     }
   }

@@ -5,8 +5,16 @@ import {
   buscarArticulosPorProveedor,
   normalizarCodigoContenedor,
 } from "@/lib/db/articulos.repository";
-import { resolverPrecios, listaParaSucursal } from "@/lib/precios/resolver-precio";
+import { resolverPrecios, listaParaSucursal, esPrecioUnico } from "@/lib/precios/resolver-precio";
 import type { LineaEtiqueta, Sucursal } from "@/types";
+
+/** En sucursales de precio unico solo cuenta la Lista: Efectivo en null es lo esperado. */
+function sinNingunPrecio(sucursal: Sucursal, efectivo: number | null, lista: number | null): boolean {
+  return esPrecioUnico(sucursal) ? lista === null : efectivo === null && lista === null;
+}
+function precioEnBlanco(sucursal: Sucursal, efectivo: number | null, lista: number | null): boolean {
+  return esPrecioUnico(sucursal) ? false : efectivo === null || lista === null;
+}
 
 export interface LineaPedida {
   sku: string;
@@ -48,11 +56,11 @@ export async function resolverLineas(pedidas: LineaPedida[], sucursal: Sucursal)
       continue;
     }
     const { precioEfectivo, precioLista } = resolverPrecios(articulo, sucursal);
-    if (precioEfectivo === null && precioLista === null) {
+    if (sinNingunPrecio(sucursal, precioEfectivo, precioLista)) {
       sinPrecio.push(p.sku);
       continue;
     }
-    if (precioEfectivo === null || precioLista === null) precioParcial.push(p.sku);
+    if (precioEnBlanco(sucursal, precioEfectivo, precioLista)) precioParcial.push(p.sku);
     lineas.push({ articulo: { ...articulo, precioEfectivo, precioLista }, cantidad: p.cantidad });
   }
 
@@ -90,11 +98,11 @@ export async function resolverLineasMasivo(
     if (!articulo.activo || articulo.discontinuado) inactivosODiscontinuados.push(p.sku);
 
     const { precioEfectivo, precioLista } = resolverPrecios(articulo, sucursal);
-    if (precioEfectivo === null && precioLista === null) {
+    if (sinNingunPrecio(sucursal, precioEfectivo, precioLista)) {
       sinPrecio.push(p.sku);
       continue;
     }
-    if (precioEfectivo === null || precioLista === null) precioParcial.push(p.sku);
+    if (precioEnBlanco(sucursal, precioEfectivo, precioLista)) precioParcial.push(p.sku);
     lineas.push({ articulo: { ...articulo, precioEfectivo, precioLista }, cantidad: p.cantidad });
   }
 
@@ -125,11 +133,11 @@ export async function resolverLineasPorContenedor(
     if (!articulo.activo || articulo.discontinuado) inactivosODiscontinuados.push(articulo.sku);
 
     const { precioEfectivo, precioLista } = resolverPrecios(articulo, sucursal);
-    if (precioEfectivo === null && precioLista === null) {
+    if (sinNingunPrecio(sucursal, precioEfectivo, precioLista)) {
       sinPrecio.push(articulo.sku);
       continue;
     }
-    if (precioEfectivo === null || precioLista === null) precioParcial.push(articulo.sku);
+    if (precioEnBlanco(sucursal, precioEfectivo, precioLista)) precioParcial.push(articulo.sku);
     lineas.push({ articulo: { ...articulo, precioEfectivo, precioLista }, cantidad: 1 });
   }
 
@@ -162,11 +170,11 @@ export async function resolverLineasPorProveedor(
     if (!articulo.activo || articulo.discontinuado) inactivosODiscontinuados.push(articulo.sku);
 
     const { precioEfectivo, precioLista } = resolverPrecios(articulo, sucursal);
-    if (precioEfectivo === null && precioLista === null) {
+    if (sinNingunPrecio(sucursal, precioEfectivo, precioLista)) {
       sinPrecio.push(articulo.sku);
       continue;
     }
-    if (precioEfectivo === null || precioLista === null) precioParcial.push(articulo.sku);
+    if (precioEnBlanco(sucursal, precioEfectivo, precioLista)) precioParcial.push(articulo.sku);
     lineas.push({ articulo: { ...articulo, precioEfectivo, precioLista }, cantidad: 1 });
   }
 
