@@ -18,6 +18,8 @@ export default function Escaner({ onScan }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [camaraActiva, setCamaraActiva] = useState(false);
   const [errorCamara, setErrorCamara] = useState<string | null>(null);
+  // Ultimo texto que llego del lector/teclado/camara (ayuda a ver que manda realmente el lector).
+  const [ultimoLeido, setUltimoLeido] = useState<string | null>(null);
   const scannerRef = useRef<any>(null);
   const ultimoCodigoRef = useRef<{ codigo: string; ts: number }>({ codigo: "", ts: 0 });
   // Para lectores USB que NO mandan Enter al final (2026-10-05): se detecta que el texto
@@ -45,8 +47,10 @@ export default function Escaner({ onScan }: Props) {
   }, [camaraActiva]);
 
   function emitirCodigo(codigo: string) {
-    const limpio = codigo.trim();
+    // Saca el prefijo AIM que agregan algunos lectores (ej. "]C1" delante de BYM1131280).
+    const limpio = codigo.trim().replace(/^\][A-Za-z][0-9A-Za-z]/, "").trim();
     if (!limpio) return;
+    setUltimoLeido(limpio);
     // Evita doble lectura del mismo codigo en menos de 1.5s (tipico si la
     // camara sigue enfocada sobre la misma etiqueta).
     const ahora = Date.now();
@@ -194,6 +198,11 @@ export default function Escaner({ onScan }: Props) {
           placeholder="Escaneá con el lector o escribí el código y apretá Enter"
         />
       </form>
+      {ultimoLeido && (
+        <p className="mt-2 text-xs text-gray-600">
+          Último código leído: <span className="font-mono font-semibold">{ultimoLeido}</span> ({ultimoLeido.length} caracteres)
+        </p>
+      )}
       <p className="mt-2 text-xs text-gray-500">
         En PC: hacé clic en cualquier parte de la pantalla y usá el lector — no hace falta tocar nada más.
       </p>
