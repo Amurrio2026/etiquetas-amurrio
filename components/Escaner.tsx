@@ -20,6 +20,11 @@ export default function Escaner({ onScan }: Props) {
   const [errorCamara, setErrorCamara] = useState<string | null>(null);
   const scannerRef = useRef<any>(null);
   const ultimoCodigoRef = useRef<{ codigo: string; ts: number }>({ codigo: "", ts: 0 });
+  // Para lectores USB que NO mandan Enter al final (2026-10-05): se detecta que el texto
+  // entro "como lo escribe un lector" (muy rapido) y se envia solo tras una pausa corta.
+  const tiemposRef = useRef<number[]>([]);
+  const largoPrevioRef = useRef(0);
+  const temporizadorRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Mantiene el foco en el input para que el lector USB siempre pueda "escribir" ahi.
   useEffect(() => {
@@ -52,10 +57,38 @@ export default function Escaner({ onScan }: Props) {
 
   function alEnviarInput(e: React.FormEvent) {
     e.preventDefault();
+    if (temporizadorRef.current) clearTimeout(temporizadorRef.current);
+    tiemposRef.current = [];
+    largoPrevioRef.current = 0;
     if (inputRef.current) {
       emitirCodigo(inputRef.current.value);
       inputRef.current.value = "";
     }
+  }
+
+  function alEscribir() {
+    const input = inputRef.current;
+    if (!input) return;
+    const largo = input.value.length;
+    const ahora = Date.now();
+    // Un lector escribe el codigo entero en milisegundos (tecla por tecla muy rapido,
+    // o pegado de golpe); una persona tipeando no llega a ese ritmo.
+    const pegadoDeGolpe = largo - largoPrevioRef.current >= 6;
+    largoPrevioRef.current = largo;
+    tiemposRef.current.push(ahora);
+    if (tiemposRef.current.length > 40) tiemposRef.current.shift();
+    if (temporizadorRef.current) clearTimeout(temporizadorRef.current);
+    temporizadorRef.current = setTimeout(() => {
+      const valor = inputRef.current?.value ?? "";
+      const t = tiemposRef.current;
+      const rapido = t.length >= 6 && (t[t.length - 1] - t[0]) / (t.length - 1) <= 60;
+      if (valor.trim().length >= 4 && (rapido || pegadoDeGolpe)) {
+        tiemposRef.current = [];
+        largoPrevioRef.current = 0;
+        emitirCodigo(valor);
+        if (inputRef.current) inputRef.current.value = "";
+      }
+    }, 150);
   }
 
   function activarCamara() {
@@ -155,6 +188,7 @@ export default function Escaner({ onScan }: Props) {
       <form onSubmit={alEnviarInput}>
         <input
           ref={inputRef}
+          onInput={alEscribir}
           autoFocus
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
           placeholder="Escaneá con el lector o escribí el código y apretá Enter"
