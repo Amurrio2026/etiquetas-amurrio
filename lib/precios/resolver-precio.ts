@@ -6,6 +6,15 @@ import sucursalesLista2 from "@/config/precios/sucursales-lista2.json";
 // dinamicamente del disco en la funcion serverless.
 const NOMBRES_LISTA2 = new Set<string>((sucursalesLista2 as { sucursales: string[] }).sucursales);
 
+/**
+ * Sucursales con "precio unico" (2026-10-05, pedido de Lucila): Rauch, Ayacucho y
+ * Madariaga muestran SOLO el precio de lista 2 en la etiqueta, sin el precio
+ * Efectivo (lista 6). Son las mismas sucursales de config/precios/sucursales-lista2.json.
+ */
+export function esPrecioUnico(sucursal: Sucursal): boolean {
+  return NOMBRES_LISTA2.has(sucursal.nombre);
+}
+
 export type ListaPrecio = "lista2" | "lista3" | "lista6";
 
 /**
@@ -47,7 +56,9 @@ export function resolverPrecios(
   sucursal: Sucursal
 ): { precioEfectivo: number | null; precioLista: number | null } {
   return {
-    precioEfectivo: resolverPrecio(articulo, sucursal, "efectivo"),
+    // En sucursales de precio unico no se muestra Efectivo: queda en null a proposito
+    // (la plantilla lo oculta y resolver-lineas no lo cuenta como "precio en blanco").
+    precioEfectivo: esPrecioUnico(sucursal) ? null : resolverPrecio(articulo, sucursal, "efectivo"),
     precioLista: resolverPrecio(articulo, sucursal, "lista"),
   };
 }
