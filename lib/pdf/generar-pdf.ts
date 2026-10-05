@@ -51,6 +51,7 @@ const ALIAS_CAMPO: Record<string, keyof ArticuloConPrecio> = {
   precio_efectivo: "precioEfectivo",
   precio_lista: "precioLista",
   sku: "sku",
+  codigo_barra: "codigoBarra",
   descripcion: "descripcion",
   categoria: "categoria",
   marca: "marcaProducto",
@@ -62,7 +63,7 @@ function resolverCampo(ruta: string, articulo: ArticuloConPrecio): unknown {
   if (partes[0] !== "articulo") return undefined;
   const clave = ALIAS_CAMPO[partes[1]];
   if (!clave) return undefined;
-  return articulo[clave];
+  return clave === "codigoBarra" ? articulo.codigoBarra ?? articulo.sku : articulo[clave];
 }
 
 function resolverTemplateTexto(tpl: string, articulo: ArticuloConPrecio): string {
