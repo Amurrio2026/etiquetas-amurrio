@@ -2,46 +2,71 @@
   "id": "casa-moda-blister",
   "marca": "Casa Moda",
   "_fuente": "2026-09-25: version 2, corregida la medida (3cm de ALTO x 5,5cm de LARGO, no al reves) y adaptada por escala desde TAG PRECIOS 8x3,8_casamoda.pdf (factor ~0.69 sobre el ancho) para mantener la misma identidad visual de la etiqueta grande -- ahora sí entra el logo.",
-
   "label": {
     "width_mm": 55,
     "height_mm": 30,
     "background": "#FFFFFF"
   },
-
   "palette": {
     "ink": "#231F20",
     "grey": "#D1D3D4",
     "white": "#FFFFFF"
   },
-
   "fonts": {
-    "regular": { "family": "Helvetica-Bold", "weight": 700 },
-    "bold": { "family": "Helvetica-Bold", "weight": 700 },
-    "extrabold": { "family": "Helvetica-Bold", "weight": 700 }
+    "regular": {
+      "family": "Helvetica-Bold",
+      "weight": 700
+    },
+    "bold": {
+      "family": "Helvetica-Bold",
+      "weight": 700
+    },
+    "extrabold": {
+      "family": "Helvetica-Bold",
+      "weight": 700
+    }
   },
-
   "elements": [
     {
       "id": "titulo",
       "type": "text",
       "field": "articulo.descripcion",
-      "x": 2.4, "y": 1.4, "w": 50, "h": 3.2,
-      "font": "regular", "size_pt": 5.2, "min_size_pt": 4, "color": "ink",
-      "align": "center", "valign": "top"
+      "x": 2.4,
+      "y": 1.4,
+      "w": 50,
+      "h": 3.2,
+      "font": "regular",
+      "size_pt": 5.2,
+      "min_size_pt": 4,
+      "color": "ink",
+      "align": "center",
+      "valign": "top"
     },
     {
       "id": "linea_1",
       "type": "rule_con_puntas",
-      "y": 4.9, "x0": 2.4, "x1": 52.6,
-      "color": "grey", "grosor_pt": 0.35, "puntas": false
+      "y": 4.9,
+      "x0": 2.4,
+      "x1": 52.6,
+      "color": "grey",
+      "grosor_pt": 0.35,
+      "puntas": false
     },
     {
       "id": "pill_efectivo",
       "type": "pill",
-      "x": 3, "y": 7.2, "w": 13, "h": 2.75,
+      "x": 3,
+      "y": 7.2,
+      "w": 13,
+      "h": 2.75,
       "fill": "grey",
-      "label": { "text": "Efectivo", "font": "bold", "size_pt": 4.1, "color": "ink" }
+      "label": {
+        "text": "Efectivo",
+        "font": "bold",
+        "size_pt": 4.1,
+        "color": "ink"
+      },
+      "solo_dos_precios": true
     },
     {
       "id": "precio_efectivo",
@@ -49,21 +74,41 @@
       "field": "articulo.precio_efectivo",
       "_nota": "precio_lista6 resuelto por sucursal, ver lib/precios/resolver-precio.ts -- igual que en el resto de las plantillas.",
       "format": "moneda_ars_sin_decimales",
-      "x": 16.9, "baseline_y": 10.4, "w": 32,
-      "font": "extrabold", "size_pt": 15.8, "color": "ink", "align": "left"
+      "x": 16.9,
+      "baseline_y": 10.4,
+      "w": 32,
+      "font": "extrabold",
+      "size_pt": 15.8,
+      "color": "ink",
+      "align": "left",
+      "solo_dos_precios": true
     },
     {
       "id": "linea_2",
       "type": "rule_con_puntas",
-      "y": 12.3, "x0": 2.4, "x1": 52.6,
-      "color": "grey", "grosor_pt": 0.35, "puntas": false
+      "y": 12.3,
+      "x0": 2.4,
+      "x1": 52.6,
+      "color": "grey",
+      "grosor_pt": 0.35,
+      "puntas": false,
+      "solo_dos_precios": true
     },
     {
       "id": "pill_lista",
       "type": "pill",
-      "x": 3, "y": 14.5, "w": 13, "h": 2.7,
+      "x": 3,
+      "y": 14.5,
+      "w": 13,
+      "h": 2.7,
       "fill": "grey",
-      "label": { "text": "Lista", "font": "bold", "size_pt": 4.1, "color": "ink" }
+      "label": {
+        "text": "Lista",
+        "font": "bold",
+        "size_pt": 4.1,
+        "color": "ink"
+      },
+      "dy_precio_unico": -3.65
     },
     {
       "id": "precio_lista",
@@ -71,31 +116,51 @@
       "field": "articulo.precio_lista",
       "_nota": "precio_lista2/lista3 segun sucursal, ver lib/precios/resolver-precio.ts -- igual que en el resto de las plantillas.",
       "format": "moneda_ars_sin_decimales",
-      "x": 16.9, "baseline_y": 17.5, "w": 29,
-      "font": "extrabold", "size_pt": 14.4, "color": "ink", "align": "left"
+      "x": 16.9,
+      "baseline_y": 17.5,
+      "w": 29,
+      "font": "extrabold",
+      "size_pt": 14.4,
+      "color": "ink",
+      "align": "left",
+      "dy_precio_unico": -3.65
     },
     {
       "id": "linea_3",
       "type": "rule_con_puntas",
-      "y": 19.2, "x0": 2.4, "x1": 52.6,
-      "color": "grey", "grosor_pt": 0.35, "puntas": false
+      "y": 19.2,
+      "x0": 2.4,
+      "x1": 52.6,
+      "color": "grey",
+      "grosor_pt": 0.35,
+      "puntas": false
     },
     {
       "id": "codigo",
       "type": "text",
       "template": "Cód: {articulo.codigo_barra}",
-      "x": 3.4, "baseline_y": 21.3, "w": 31,
-      "font": "regular", "size_pt": 4.1, "color": "ink", "align": "left",
+      "x": 3.4,
+      "baseline_y": 21.3,
+      "w": 31,
+      "font": "regular",
+      "size_pt": 4.1,
+      "color": "ink",
+      "align": "left",
       "letter_spacing_mm": 0.2
     },
     {
       "id": "pill_legal",
       "type": "pill",
-      "x": 2.5, "y": 22.7, "w": 27.3, "h": 2.2,
+      "x": 2.5,
+      "y": 22.7,
+      "w": 27.3,
+      "h": 2.2,
       "fill": "ink",
       "label": {
         "text": "Precios c/imp. nacionales.",
-        "font": "regular", "size_pt": 3.4, "color": "white"
+        "font": "regular",
+        "size_pt": 3.4,
+        "color": "white"
       }
     },
     {
@@ -104,10 +169,10 @@
       "asset": "logos/casa-moda.png",
       "align_right_margin_mm": 2.4,
       "align_bottom_margin_mm": 5.2,
-      "w": 18.4, "h": 2.4
+      "w": 18.4,
+      "h": 2.4
     }
   ],
-
   "pendientes": [
     "2026-09-25 v2: corregida la orientacion (3cm alto x 5,5cm largo -- la v1 la tenia al reves). Se adapto por escala desde la plantilla grande de Casa Moda (mismo layout: pill + precio en la misma fila, texto legal + logo en la fila de abajo) en vez de rearmarla de cero. Pendiente de que Lucila la vea impresa y confirme tamaños."
   ]

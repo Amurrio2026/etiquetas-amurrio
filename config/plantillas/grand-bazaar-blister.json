@@ -2,46 +2,71 @@
   "id": "grand-bazaar-blister",
   "marca": "Grand Bazaar",
   "_fuente": "2026-09-25: version 2, corregida la medida (3cm de ALTO x 5,5cm de LARGO, no al reves) y adaptada por escala desde GB_ETIQUEAS 9,8x4,8CM.pdf (factor ~0.56 sobre el ancho) para mantener la misma identidad visual de la etiqueta grande -- ahora sí entra el logo.",
-
   "label": {
     "width_mm": 55,
     "height_mm": 30,
     "background": "#FFFFFF"
   },
-
   "palette": {
     "ink": "#231F20",
     "grey": "#D1D3D4",
     "white": "#FFFFFF"
   },
-
   "fonts": {
-    "regular": { "family": "Baloo 2", "weight": 500 },
-    "bold": { "family": "Baloo 2", "weight": 700 },
-    "extrabold": { "family": "Baloo 2", "weight": 800 }
+    "regular": {
+      "family": "Baloo 2",
+      "weight": 500
+    },
+    "bold": {
+      "family": "Baloo 2",
+      "weight": 700
+    },
+    "extrabold": {
+      "family": "Baloo 2",
+      "weight": 800
+    }
   },
-
   "elements": [
     {
       "id": "titulo",
       "type": "text",
       "field": "articulo.descripcion",
-      "x": 3.5, "y": 1.5, "w": 48, "h": 4,
-      "font": "regular", "size_pt": 5.2, "min_size_pt": 4, "color": "ink",
-      "align": "center", "valign": "top"
+      "x": 3.5,
+      "y": 1.5,
+      "w": 48,
+      "h": 4,
+      "font": "regular",
+      "size_pt": 5.2,
+      "min_size_pt": 4,
+      "color": "ink",
+      "align": "center",
+      "valign": "top"
     },
     {
       "id": "linea_1",
       "type": "rule_con_puntas",
-      "y": 5.3, "x0": 3.4, "x1": 51.6,
-      "color": "grey", "grosor_pt": 0.35, "diametro_punta_mm": 0.5
+      "y": 5.3,
+      "x0": 3.4,
+      "x1": 51.6,
+      "color": "grey",
+      "grosor_pt": 0.35,
+      "diametro_punta_mm": 0.5
     },
     {
       "id": "pill_efectivo",
       "type": "pill",
-      "x": 3, "y": 7, "w": 12, "h": 2.6,
+      "x": 3,
+      "y": 7,
+      "w": 12,
+      "h": 2.6,
       "fill": "grey",
-      "label": { "text": "Efectivo", "font": "bold", "size_pt": 4, "color": "ink" }
+      "label": {
+        "text": "Efectivo",
+        "font": "bold",
+        "size_pt": 4,
+        "color": "ink"
+      },
+      "solo_dos_precios": true
     },
     {
       "id": "precio_efectivo",
@@ -49,21 +74,41 @@
       "field": "articulo.precio_efectivo",
       "_nota": "precio_lista6 resuelto por sucursal, ver lib/precios/resolver-precio.ts -- igual que en el resto de las plantillas.",
       "format": "moneda_ars_sin_decimales",
-      "x": 16.5, "baseline_y": 10.2, "w": 25,
-      "font": "extrabold", "size_pt": 14, "color": "ink", "align": "left"
+      "x": 16.5,
+      "baseline_y": 10.2,
+      "w": 25,
+      "font": "extrabold",
+      "size_pt": 14,
+      "color": "ink",
+      "align": "left",
+      "solo_dos_precios": true
     },
     {
       "id": "linea_2",
       "type": "rule_con_puntas",
-      "y": 12.1, "x0": 3.4, "x1": 51.6,
-      "color": "grey", "grosor_pt": 0.35, "diametro_punta_mm": 0.5
+      "y": 12.1,
+      "x0": 3.4,
+      "x1": 51.6,
+      "color": "grey",
+      "grosor_pt": 0.35,
+      "diametro_punta_mm": 0.5,
+      "solo_dos_precios": true
     },
     {
       "id": "pill_lista",
       "type": "pill",
-      "x": 3, "y": 13.8, "w": 12, "h": 2.6,
+      "x": 3,
+      "y": 13.8,
+      "w": 12,
+      "h": 2.6,
       "fill": "grey",
-      "label": { "text": "Lista", "font": "bold", "size_pt": 4, "color": "ink" }
+      "label": {
+        "text": "Lista",
+        "font": "bold",
+        "size_pt": 4,
+        "color": "ink"
+      },
+      "dy_precio_unico": -3.25
     },
     {
       "id": "precio_lista",
@@ -71,38 +116,61 @@
       "field": "articulo.precio_lista",
       "_nota": "precio_lista2/lista3 segun sucursal, ver lib/precios/resolver-precio.ts -- igual que en el resto de las plantillas.",
       "format": "moneda_ars_sin_decimales",
-      "x": 16.5, "baseline_y": 17.0, "w": 22,
-      "font": "extrabold", "size_pt": 13, "color": "ink", "align": "left"
+      "x": 16.5,
+      "baseline_y": 17.0,
+      "w": 22,
+      "font": "extrabold",
+      "size_pt": 13,
+      "color": "ink",
+      "align": "left",
+      "dy_precio_unico": -3.25
     },
     {
       "id": "linea_3",
       "type": "rule_con_puntas",
-      "y": 18.9, "x0": 3.4, "x1": 51.6,
-      "color": "grey", "grosor_pt": 0.35, "diametro_punta_mm": 0.5
+      "y": 18.9,
+      "x0": 3.4,
+      "x1": 51.6,
+      "color": "grey",
+      "grosor_pt": 0.35,
+      "diametro_punta_mm": 0.5
     },
     {
       "id": "banda_inferior",
       "type": "rect",
       "_nota": "En el original (98x48mm) esta banda arranca en el 83% de la altura, o sea que solo tapa la mitad de abajo del cartel 'Precios c/imp. nacionales' y del logo, no la fila completa -- se mantiene la misma proporcion acá. Va ANTES que codigo/pill_legal/logo en la lista para quedar detrás (se dibuja primero).",
-      "x": 0, "y": 24.9, "w": 55, "h": 5.1,
+      "x": 0,
+      "y": 24.9,
+      "w": 55,
+      "h": 5.1,
       "fill": "grey"
     },
     {
       "id": "codigo",
       "type": "text",
       "template": "Cód: {articulo.codigo_barra}",
-      "x": 3.6, "baseline_y": 22.9, "w": 28,
-      "font": "regular", "size_pt": 4, "color": "ink", "align": "left",
+      "x": 3.6,
+      "baseline_y": 22.9,
+      "w": 28,
+      "font": "regular",
+      "size_pt": 4,
+      "color": "ink",
+      "align": "left",
       "letter_spacing_mm": 0.15
     },
     {
       "id": "pill_legal",
       "type": "pill",
-      "x": 3.6, "y": 24.1, "w": 26, "h": 2.0,
+      "x": 3.6,
+      "y": 24.1,
+      "w": 26,
+      "h": 2.0,
       "fill": "ink",
       "label": {
         "text": "Precios c/imp. nacionales.",
-        "font": "regular", "size_pt": 3.2, "color": "white"
+        "font": "regular",
+        "size_pt": 3.2,
+        "color": "white"
       }
     },
     {
@@ -111,10 +179,10 @@
       "asset": "logos/grand-bazaar.png",
       "align_right_margin_mm": 3.6,
       "align_bottom_margin_mm": 3.3,
-      "w": 9, "h": 4.7
+      "w": 9,
+      "h": 4.7
     }
   ],
-
   "pendientes": [
     "2026-09-25 v2: corregida la orientacion (3cm alto x 5,5cm largo -- la v1 la tenia al reves). Se adapto por escala desde la plantilla grande de Grand Bazaar (mismo layout: pill + precio en la misma fila, banda gris inferior con el texto legal y el logo) en vez de rearmarla de cero. Pendiente de que Lucila la vea impresa y confirme tamaños."
   ]
