@@ -337,7 +337,8 @@ export default function Home() {
                 <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">Artículo encontrado</p>
                 <p className="font-semibold text-gray-900">{articuloEncontrado.descripcion}</p>
                 <p className="text-sm text-gray-500 mb-3">
-                  {articuloEncontrado.sku} · Efectivo {formatearPrecio(articuloEncontrado.precioEfectivo)} · Lista{" "}
+                  {articuloEncontrado.sku}
+                  {sucursalActual?.precioUnico ? "" : ` · Efectivo ${formatearPrecio(articuloEncontrado.precioEfectivo)}`} · Lista{" "}
                   {formatearPrecio(articuloEncontrado.precioLista)}
                 </p>
                 <div className="flex items-end gap-3">
@@ -368,7 +369,12 @@ export default function Home() {
               </div>
             )}
 
-            <ListadoEtiquetas lineas={lineas} onCambiarCantidad={cambiarCantidad} onEliminar={eliminarLinea} />
+            <ListadoEtiquetas
+              lineas={lineas}
+              onCambiarCantidad={cambiarCantidad}
+              onEliminar={eliminarLinea}
+              precioUnico={Boolean(sucursalActual?.precioUnico)}
+            />
           </>
         ) : modo === "masivo" ? (
           <CargaMasiva
