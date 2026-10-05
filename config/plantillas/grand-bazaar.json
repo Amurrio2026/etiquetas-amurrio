@@ -90,7 +90,7 @@
     {
       "id": "codigo",
       "type": "text",
-      "template": "Código: {articulo.sku}",
+      "template": "Código: {articulo.codigo_barra}",
       "x": 8.0, "baseline_y": 36.6, "w": 50,
       "font": "regular", "size_pt": 7, "color": "ink", "align": "left",
       "letter_spacing_mm": 0.35

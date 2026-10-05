@@ -84,7 +84,7 @@
     {
       "id": "codigo",
       "type": "text",
-      "template": "Código: {articulo.sku}",
+      "template": "Código: {articulo.codigo_barra}",
       "x": 4.94, "baseline_y": 31.0, "w": 45,
       "font": "regular", "size_pt": 6, "color": "ink", "align": "left",
       "letter_spacing_mm": 0.3
