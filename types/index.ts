@@ -45,6 +45,8 @@ export interface Sucursal {
   nombre: string;
   marca: string; // banner de la sucursal: "Grand Bazaar" | "Casa Moda"
   email: string;
+  /** Calculado por la app (no viene de la base): true = la etiqueta muestra SOLO el precio de lista 2 (ver esPrecioUnico). */
+  precioUnico?: boolean;
 }
 
 export interface LineaEtiqueta {
