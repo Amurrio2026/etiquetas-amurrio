@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cargarPlantillaParaFormato, buscarFormatoHoja } from "@/lib/config";
 import { generarPdf } from "@/lib/pdf/generar-pdf";
+import { esPrecioUnico } from "@/lib/precios/resolver-precio";
 import { resolverLineas, type LineaPedida } from "@/lib/pdf/resolver-lineas";
 import { listarSucursalesActivas } from "@/lib/db/sucursales.repository";
 
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
     const formato = await buscarFormatoHoja(cuerpo.formatoId);
     const plantilla = await cargarPlantillaParaFormato(sucursal.marca, formato);
 
-    const pdfBytes = await generarPdf({ lineas, formato, plantilla });
+    const pdfBytes = await generarPdf({ lineas, formato, plantilla, precioUnico: esPrecioUnico(sucursal) });
 
     return new NextResponse(Buffer.from(pdfBytes), {
       status: 200,
