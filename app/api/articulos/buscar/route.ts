@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buscarArticuloPorSku } from "@/lib/db/articulos.repository";
+import { buscarArticuloPorSku, diagnosticarBarras } from "@/lib/db/articulos.repository";
 import { listarSucursalesActivas } from "@/lib/db/sucursales.repository";
 import { resolverPrecios } from "@/lib/precios/resolver-precio";
 
 export async function GET(req: NextRequest) {
   const sku = req.nextUrl.searchParams.get("sku");
+
+  // TEMPORAL: /api/articulos/buscar?sku=XXXX&diagnostico=1 muestra si la app lee
+  // maestros.codigos_barra (se saca cuando se resuelva el escaneo por codigo de barras).
+  if (sku && req.nextUrl.searchParams.get("diagnostico") === "1") {
+    return NextResponse.json(await diagnosticarBarras(sku.trim()));
+  }
   const sucursalCodigo = req.nextUrl.searchParams.get("sucursalCodigo");
 
   if (!sku) {
