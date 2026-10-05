@@ -7,6 +7,7 @@ import SelectorSucursal from "@/components/SelectorSucursal";
 import SelectorFormato from "@/components/SelectorFormato";
 import CargaMasiva, { type ResultadoValidacion } from "@/components/CargaMasiva";
 import PorContenedor from "@/components/PorContenedor";
+import CampoCantidad from "@/components/CampoCantidad";
 import type { ArticuloConPrecio, FormatoHoja, Sucursal } from "@/types";
 
 type Modo = "escaneo" | "masivo" | "contenedor";
@@ -334,13 +335,11 @@ export default function Home() {
                 <div className="flex items-end gap-3">
                   <label className="block">
                     <span className="text-xs font-semibold text-gray-700">Cantidad de etiquetas</span>
-                    <input
-                      type="number"
-                      min={1}
+                    <CampoCantidad
                       autoFocus
-                      value={cantidadPendiente}
-                      onChange={(e) => setCantidadPendiente(Math.max(1, Number(e.target.value) || 1))}
-                      onKeyDown={(e) => e.key === "Enter" && agregarAlListado()}
+                      valor={cantidadPendiente}
+                      onCambiar={setCantidadPendiente}
+                      onEnter={agregarAlListado}
                       className="mt-1 w-28 rounded-md border border-gray-300 px-3 py-2 text-sm"
                     />
                   </label>
