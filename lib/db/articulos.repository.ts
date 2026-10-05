@@ -18,6 +18,9 @@ let cacheBarras: Map<string, string> = new Map();
 let cacheCargadaEn = 0;
 // sku -> codigo de barra elegido para imprimir en la etiqueta (ver elegirCodigoBarra)
 let barraParaImprimir: Map<string, string> = new Map();
+// SKU en mayusculas -> sku real: para que un lector que manda "bym109730" (o con otra
+// capitalizacion) igual encuentre el articulo "BYM109730".
+let skuPorMayuscula: Map<string, string> = new Map();
 
 /**
  * Pedido de Lucila (2026-10-05): la etiqueta tiene que mostrar el CODIGO DE
@@ -118,6 +121,10 @@ async function obtenerCache(): Promise<Map<string, Articulo>> {
       if (lista) lista.push(barra);
       else porSku.set(sku, [barra]);
     }
+    skuPorMayuscula = new Map();
+    // Solo se ignora mayusculas/minusculas. NO se ignoran guiones: "BYM1131-28" y "BYM1131280"
+    // son articulos distintos y mezclarlos imprimiria un precio equivocado.
+    for (const sku of cache.keys()) skuPorMayuscula.set(sku.toUpperCase(), sku);
     barraParaImprimir = new Map();
     for (const sku of cache.keys()) barraParaImprimir.set(sku, elegirCodigoBarra(sku, porSku.get(sku)));
     for (const [sku, a] of cache) cache.set(sku, conCodigoBarra(a));
@@ -137,7 +144,11 @@ function resolverCodigo(mapa: Map<string, Articulo>, codigo: string): Articulo |
   const directo = mapa.get(codigo);
   if (directo) return directo;
   const sku = cacheBarras.get(codigo);
-  return sku ? mapa.get(sku) ?? null : null;
+  if (sku) return mapa.get(sku) ?? null;
+  // Ultimo recurso: ignorar mayusculas/minusculas (solo para codigos con letras).
+  if (/^[0-9]+$/.test(codigo)) return null;
+  const real = skuPorMayuscula.get(codigo.toUpperCase());
+  return real ? mapa.get(real) ?? null : null;
 }
 
 /**
@@ -145,7 +156,7 @@ function resolverCodigo(mapa: Map<string, Articulo>, codigo: string): Articulo |
  * codigo de barra (ver resolverCodigo). Devuelve null si no existe.
  */
 export async function buscarArticuloPorSku(sku: string): Promise<Articulo | null> {
-  const codigo = sku.trim();
+  const codigo = sku.replace(/[\u0000-\u001f\u007f]/g, "").trim();
   if (!codigo) return null;
 
   if (!tieneBaseReal()) return buscarArticuloMock(codigo);
