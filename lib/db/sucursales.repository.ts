@@ -1,6 +1,9 @@
 import { getPool, tieneBaseReal } from "@/lib/db/client";
 import { SUCURSALES_MOCK } from "@/lib/mock/sucursales";
 import type { Sucursal } from "@/types";
+import { esPrecioUnico } from "@/lib/precios/resolver-precio";
+
+const conPrecioUnico = (s: Sucursal): Sucursal => ({ ...s, precioUnico: esPrecioUnico(s) });
 
 /**
  * Marcas habilitadas en la app (2026-09-03: se suma Casa Moda al piloto,
@@ -12,7 +15,7 @@ const MARCAS_ACTIVAS = ["Grand Bazaar", "Casa Moda"];
 
 export async function listarSucursalesActivas(): Promise<Sucursal[]> {
   if (!tieneBaseReal()) {
-    return SUCURSALES_MOCK.filter((s) => MARCAS_ACTIVAS.includes(s.marca));
+    return SUCURSALES_MOCK.filter((s) => MARCAS_ACTIVAS.includes(s.marca)).map(conPrecioUnico);
   }
 
   const pool = getPool()!;
@@ -25,10 +28,12 @@ export async function listarSucursalesActivas(): Promise<Sucursal[]> {
     [MARCAS_ACTIVAS]
   );
 
-  return rows.map((r) => ({
-    codigoSucursal: r.codigo_sucursal,
-    nombre: r.nombre,
-    marca: r.marca,
-    email: r.email,
-  }));
+  return rows.map((r) =>
+    conPrecioUnico({
+      codigoSucursal: r.codigo_sucursal,
+      nombre: r.nombre,
+      marca: r.marca,
+      email: r.email,
+    })
+  );
 }
