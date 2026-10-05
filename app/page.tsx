@@ -244,9 +244,17 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 pb-16">
       <header className="border-b border-gray-200 bg-white">
-        <div className="max-w-3xl mx-auto px-4 py-4">
-          <h1 className="text-lg font-bold text-gray-900">Etiquetas Amurrio</h1>
-          <p className="text-xs text-gray-500">Piloto: sucursales Grand Bazaar y Casa Moda</p>
+        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">Etiquetas Amurrio</h1>
+            <p className="text-xs text-gray-500">Sucursales Grand Bazaar y Casa Moda</p>
+          </div>
+          <div className="flex items-center gap-4 shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logos/grand-bazaar.png" alt="Grand Bazaar" className="h-8 w-auto" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logos/casa-moda.png" alt="Casa Moda" className="h-4 w-auto" />
+          </div>
         </div>
       </header>
 
