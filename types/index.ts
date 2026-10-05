@@ -22,6 +22,8 @@ export interface Articulo {
   /** Informativo, no se usa para filtrar (ver lib/db/articulos.repository.ts). */
   activo: boolean;
   discontinuado: boolean;
+  /** Codigo de barras a imprimir en la etiqueta (ver elegirCodigoBarra en lib/db/articulos.repository.ts). Si falta, se usa el sku. */
+  codigoBarra?: string;
 }
 
 /**
