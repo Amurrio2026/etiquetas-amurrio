@@ -11,7 +11,36 @@ import type { Articulo } from "@/types";
 const TTL_MS = 5 * 60 * 1000; // 5 minutos, ver arquitectura: "cache refrescada cada pocos minutos"
 
 let cache: Map<string, Articulo> | null = null;
+// codigo_barra -> sku (maestros.codigos_barra, tabla nueva del 05/10/2026: un
+// SKU puede tener varios codigos de barra, y el que se escanea/tipea en el
+// local a veces es ese y no el sku). Se refresca junto con "cache".
+let cacheBarras: Map<string, string> = new Map();
 let cacheCargadaEn = 0;
+// sku -> codigo de barra elegido para imprimir en la etiqueta (ver elegirCodigoBarra)
+let barraParaImprimir: Map<string, string> = new Map();
+
+/**
+ * Pedido de Lucila (2026-10-05): la etiqueta tiene que mostrar el CODIGO DE
+ * BARRAS, no el sku interno (los "BYM...", "JU...", "L929", etc.).
+ * - Si el sku ya es un numero de 8+ digitos, ES el codigo de barras: se deja.
+ * - Si no (sku con letras o numero corto) se toma uno de maestros.codigos_barra,
+ *   solo de los numericos, prefiriendo EAN-13, luego 12, 8 y el mas largo; si
+ *   hay empate, el menor (para que sea siempre el mismo). Un sku puede tener
+ *   hasta 14 codigos: no hay forma de saber cual es "el principal".
+ * - Si no hay ninguno, se imprime el sku (mejor eso que dejarlo vacio).
+ */
+function elegirCodigoBarra(sku: string, barras: string[] | undefined): string {
+  if (/^\d{8,}$/.test(sku)) return sku;
+  const numericas = (barras ?? []).filter((b) => /^\d+$/.test(b));
+  if (numericas.length === 0) return sku;
+  const prioridad = (b: string) => (b.length === 13 ? 0 : b.length === 12 ? 1 : b.length === 8 ? 2 : 3);
+  numericas.sort((a, b) => prioridad(a) - prioridad(b) || (prioridad(a) === 3 ? b.length - a.length : 0) || a.localeCompare(b));
+  return numericas[0];
+}
+
+function conCodigoBarra(a: Articulo): Articulo {
+  return { ...a, codigoBarra: barraParaImprimir.get(a.sku) ?? a.sku };
+}
 
 async function cargarCacheDesdeBaseReal(): Promise<Map<string, Articulo>> {
   const pool = getPool();
@@ -60,16 +89,61 @@ function cargarCacheMock(): Map<string, Articulo> {
   return mapa;
 }
 
+async function cargarBarrasDesdeBaseReal(): Promise<Map<string, string>> {
+  const pool = getPool();
+  if (!pool) throw new Error("DATABASE_URL no configurada");
+  const { rows } = await pool.query(`select codigo_barra, sku from maestros.codigos_barra`);
+  const mapa = new Map<string, string>();
+  for (const r of rows) mapa.set(String(r.codigo_barra).trim(), String(r.sku).trim());
+  return mapa;
+}
+
 async function obtenerCache(): Promise<Map<string, Articulo>> {
   const vencida = !cache || Date.now() - cacheCargadaEn > TTL_MS;
   if (!vencida && cache) return cache;
 
-  cache = tieneBaseReal() ? await cargarCacheDesdeBaseReal() : cargarCacheMock();
+  if (tieneBaseReal()) {
+    cache = await cargarCacheDesdeBaseReal();
+    // Si la tabla de codigos de barra fallara (ej. permisos), la app sigue
+    // funcionando solo por sku como antes en vez de caerse entera.
+    try {
+      cacheBarras = await cargarBarrasDesdeBaseReal();
+    } catch (err) {
+      console.error("No se pudo cargar maestros.codigos_barra (se sigue solo por sku)", err);
+      cacheBarras = new Map();
+    }
+    const porSku = new Map<string, string[]>();
+    for (const [barra, sku] of cacheBarras) {
+      const lista = porSku.get(sku);
+      if (lista) lista.push(barra);
+      else porSku.set(sku, [barra]);
+    }
+    barraParaImprimir = new Map();
+    for (const sku of cache.keys()) barraParaImprimir.set(sku, elegirCodigoBarra(sku, porSku.get(sku)));
+    for (const [sku, a] of cache) cache.set(sku, conCodigoBarra(a));
+  } else {
+    cache = cargarCacheMock();
+  }
   cacheCargadaEn = Date.now();
   return cache;
 }
 
-/** Busca un articulo por su codigo de barras (sku). Devuelve null si no existe. */
+/**
+ * Misma regla que maestros.buscar_articulo(codigo) en la base: primero match
+ * directo por sku; SOLO si no hay, se busca como codigo de barra (asi un sku
+ * que casualmente coincide con el codigo de barra de OTRO articulo no pierde).
+ */
+function resolverCodigo(mapa: Map<string, Articulo>, codigo: string): Articulo | null {
+  const directo = mapa.get(codigo);
+  if (directo) return directo;
+  const sku = cacheBarras.get(codigo);
+  return sku ? mapa.get(sku) ?? null : null;
+}
+
+/**
+ * Busca un articulo por el codigo escaneado/tipeado: sku o, si no matchea,
+ * codigo de barra (ver resolverCodigo). Devuelve null si no existe.
+ */
 export async function buscarArticuloPorSku(sku: string): Promise<Articulo | null> {
   const codigo = sku.trim();
   if (!codigo) return null;
@@ -77,7 +151,7 @@ export async function buscarArticuloPorSku(sku: string): Promise<Articulo | null
   if (!tieneBaseReal()) return buscarArticuloMock(codigo);
 
   const mapa = await obtenerCache();
-  return mapa.get(codigo) ?? null;
+  return resolverCodigo(mapa, codigo);
 }
 
 /**
@@ -92,7 +166,7 @@ export async function buscarArticulosPorSkus(skus: string[]): Promise<Map<string
   for (const skuCrudo of skus) {
     const codigo = skuCrudo.trim();
     if (!codigo) continue;
-    const articulo = mapa.get(codigo);
+    const articulo = resolverCodigo(mapa, codigo);
     if (articulo) resultado.set(codigo, articulo);
   }
   return resultado;
@@ -146,17 +220,20 @@ export async function buscarArticulosPorContenedor(codigoContenedorCrudo: string
     [patron]
   );
 
-  return rows.map((r) => ({
-    sku: r.sku,
-    descripcion: r.descripcion,
-    categoria: r.categoria,
-    marcaProducto: r.marca,
-    precioLista2: r.precio_lista2 != null ? Number(r.precio_lista2) : null,
-    precioLista3: r.precio_lista3 != null ? Number(r.precio_lista3) : null,
-    precioLista6: r.precio_lista6 != null ? Number(r.precio_lista6) : null,
-    activo: Boolean(r.activo),
-    discontinuado: Boolean(r.discontinuado),
-  }));
+  await obtenerCache(); // asegura barraParaImprimir cargado
+  return rows.map((r) =>
+    conCodigoBarra({
+      sku: r.sku,
+      descripcion: r.descripcion,
+      categoria: r.categoria,
+      marcaProducto: r.marca,
+      precioLista2: r.precio_lista2 != null ? Number(r.precio_lista2) : null,
+      precioLista3: r.precio_lista3 != null ? Number(r.precio_lista3) : null,
+      precioLista6: r.precio_lista6 != null ? Number(r.precio_lista6) : null,
+      activo: Boolean(r.activo),
+      discontinuado: Boolean(r.discontinuado),
+    })
+  );
 }
 
 /**
@@ -225,19 +302,48 @@ export async function buscarArticulosPorProveedor(
     [nombre, hayRangoFechas, listasAFiltrar, fechaDesde ?? null, fechaHasta ?? null]
   );
 
-  return rows.map((r) => ({
-    sku: r.sku,
-    descripcion: r.descripcion,
-    categoria: r.categoria,
-    marcaProducto: r.marca,
-    precioLista2: r.precio_lista2 != null ? Number(r.precio_lista2) : null,
-    precioLista3: r.precio_lista3 != null ? Number(r.precio_lista3) : null,
-    precioLista6: r.precio_lista6 != null ? Number(r.precio_lista6) : null,
-    activo: Boolean(r.activo),
-    discontinuado: Boolean(r.discontinuado),
-  }));
+  await obtenerCache(); // asegura barraParaImprimir cargado
+  return rows.map((r) =>
+    conCodigoBarra({
+      sku: r.sku,
+      descripcion: r.descripcion,
+      categoria: r.categoria,
+      marcaProducto: r.marca,
+      precioLista2: r.precio_lista2 != null ? Number(r.precio_lista2) : null,
+      precioLista3: r.precio_lista3 != null ? Number(r.precio_lista3) : null,
+      precioLista6: r.precio_lista6 != null ? Number(r.precio_lista6) : null,
+      activo: Boolean(r.activo),
+      discontinuado: Boolean(r.discontinuado),
+    })
+  );
 }
 
 export function usandoDatosDeEjemplo(): boolean {
   return !tieneBaseReal();
+}
+
+/**
+ * DIAGNOSTICO TEMPORAL (2026-10-05): para ver desde la app desplegada si puede
+ * leer maestros.codigos_barra y si resuelve un codigo puntual. Se saca una vez
+ * resuelto el problema de que escanear un codigo de barras no traia nada.
+ */
+export async function diagnosticarBarras(codigo: string) {
+  const pool = getPool();
+  if (!pool) return { baseReal: false };
+  const salida: Record<string, unknown> = { baseReal: true, codigo };
+  try {
+    const u = await pool.query(`select current_user as usuario`);
+    salida.usuarioDb = u.rows[0]?.usuario;
+    const c = await pool.query(`select count(*)::int as filas from maestros.codigos_barra`);
+    salida.filasCodigosBarra = c.rows[0]?.filas;
+    const r = await pool.query(`select sku from maestros.codigos_barra where codigo_barra = $1`, [codigo]);
+    salida.skuPorBarra = r.rows[0]?.sku ?? null;
+    const a = await pool.query(`select sku, descripcion is not null as tiene_descripcion from maestros.articulos where sku = $1`, [r.rows[0]?.sku ?? "__ninguno__"]);
+    salida.articulo = a.rows[0] ?? null;
+  } catch (err: any) {
+    salida.error = String(err?.message ?? err);
+  }
+  const mapa = await obtenerCache().catch(() => null);
+  salida.enCache = { articulos: mapa?.size ?? null, barras: cacheBarras.size, resuelve: mapa ? Boolean(resolverCodigo(mapa, codigo)) : null };
+  return salida;
 }
