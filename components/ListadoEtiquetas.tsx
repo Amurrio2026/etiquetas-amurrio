@@ -12,9 +12,11 @@ interface Props {
   lineas: LineaUI[];
   onCambiarCantidad: (sku: string, cantidad: number) => void;
   onEliminar: (sku: string) => void;
+  /** Sucursal de precio unico (Rauch/Ayacucho/Madariaga): no se muestra la columna Efectivo. */
+  precioUnico?: boolean;
 }
 
-export default function ListadoEtiquetas({ lineas, onCambiarCantidad, onEliminar }: Props) {
+export default function ListadoEtiquetas({ lineas, onCambiarCantidad, onEliminar, precioUnico = false }: Props) {
   const totalDistintos = lineas.length;
   const totalEtiquetas = lineas.reduce((acc, l) => acc + l.cantidad, 0);
 
@@ -37,7 +39,7 @@ export default function ListadoEtiquetas({ lineas, onCambiarCantidad, onEliminar
               <tr className="text-left text-xs uppercase tracking-wide text-gray-400 border-b border-gray-200">
                 <th className="py-2 pr-2">Artículo</th>
                 <th className="py-2 pr-2">Código</th>
-                <th className="py-2 pr-2">Efectivo</th>
+                {!precioUnico && <th className="py-2 pr-2">Efectivo</th>}
                 <th className="py-2 pr-2">Lista</th>
                 <th className="py-2 pr-2 w-24">Cantidad</th>
                 <th className="py-2 w-10" />
@@ -48,11 +50,13 @@ export default function ListadoEtiquetas({ lineas, onCambiarCantidad, onEliminar
                 <tr key={l.articulo.sku} className="border-b border-gray-100 last:border-0">
                   <td className="py-2 pr-2">{l.articulo.descripcion}</td>
                   <td className="py-2 pr-2 font-mono text-xs text-gray-500">{l.articulo.sku}</td>
-                  <td className="py-2 pr-2 tabular-nums">
-                    {l.articulo.precioEfectivo === null
-                      ? "-"
-                      : `$${Math.round(l.articulo.precioEfectivo).toLocaleString("es-AR")}`}
-                  </td>
+                  {!precioUnico && (
+                    <td className="py-2 pr-2 tabular-nums">
+                      {l.articulo.precioEfectivo === null
+                        ? "-"
+                        : `$${Math.round(l.articulo.precioEfectivo).toLocaleString("es-AR")}`}
+                    </td>
+                  )}
                   <td className="py-2 pr-2 tabular-nums">
                     {l.articulo.precioLista === null
                       ? "-"
