@@ -60,7 +60,7 @@ export default function Home() {
     cantidad: number;
     repetido: boolean;
   } | null>(null);
-  const temporizadorConfirmacion = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [escanerBloqueado, setEscanerBloqueado] = useState(false);
   // Copia siempre actual del listado, para saber la cantidad real dentro de handlers async.
   const lineasRef = useRef<LineaUI[]>([]);
   lineasRef.current = lineas;
@@ -174,8 +174,9 @@ export default function Home() {
         repetido: Boolean(previa),
       });
       sonarBeep(Boolean(previa));
-      if (temporizadorConfirmacion.current) clearTimeout(temporizadorConfirmacion.current);
-      temporizadorConfirmacion.current = setTimeout(() => setConfirmacion(null), 6000);
+      // Se pausa el escaner hasta que la persona toque "Escanear otro articulo":
+      // evita sumar etiquetas de mas por escanear varias veces el mismo codigo.
+      setEscanerBloqueado(true);
     } catch {
       setAviso({ tipo: "error", texto: "No se pudo consultar la base de artículos. Probá de nuevo." });
     }
@@ -387,7 +388,14 @@ export default function Home() {
 
         {modo === "escaneo" ? (
           <>
-            <Escaner onScan={alEscanear} />
+            <Escaner
+              onScan={alEscanear}
+              bloqueado={escanerBloqueado}
+              onDesbloquear={() => {
+                setEscanerBloqueado(false);
+                setConfirmacion(null);
+              }}
+            />
 
             {confirmacion && (
               <div
