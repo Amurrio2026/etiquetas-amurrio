@@ -158,6 +158,23 @@
       "letter_spacing_mm": 0.35
     },
     {
+      "id": "precio_sin_impuestos",
+      "type": "text",
+      "_nota": "Precio de lista de la sucursal (lista 2 en Ayacucho/Rauch/Madariaga, lista 3 en el resto) dividido 1,21. Ver lib/precios/resolver-precio.ts",
+      "template": "Precio sin impuestos nacionales: {articulo.precio_sin_impuestos}",
+      "format": "moneda_ars_2_decimales",
+      "x": 6.67,
+      "baseline_y": 45.3,
+      "w": 66.0,
+      "font": "bold",
+      "size_pt": 7.5,
+      "min_size_pt": 6.0,
+      "color": "ink",
+      "align": "left",
+      "ajustar_a_w": true,
+      "omitir_si_vacio": true
+    },
+    {
       "id": "pill_legal",
       "type": "pill",
       "x": 6.67,

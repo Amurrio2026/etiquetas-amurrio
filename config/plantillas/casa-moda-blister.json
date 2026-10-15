@@ -34,10 +34,10 @@
       "x": 2.4,
       "y": 1.4,
       "w": 50,
-      "h": 3.2,
+      "h": 3.4,
       "font": "regular",
-      "size_pt": 5.2,
-      "min_size_pt": 4,
+      "size_pt": 6.6,
+      "min_size_pt": 5,
       "color": "ink",
       "align": "center",
       "valign": "top"
@@ -63,7 +63,7 @@
       "label": {
         "text": "Efectivo",
         "font": "bold",
-        "size_pt": 4.1,
+        "size_pt": 5.4,
         "color": "ink"
       },
       "solo_dos_precios": true
@@ -105,7 +105,7 @@
       "label": {
         "text": "Lista",
         "font": "bold",
-        "size_pt": 4.1,
+        "size_pt": 5.4,
         "color": "ink"
       },
       "dy_precio_unico": -3.65
@@ -143,10 +143,27 @@
       "baseline_y": 21.3,
       "w": 31,
       "font": "regular",
-      "size_pt": 4.1,
+      "size_pt": 5.6,
       "color": "ink",
       "align": "left",
       "letter_spacing_mm": 0.2
+    },
+    {
+      "id": "precio_sin_impuestos",
+      "type": "text",
+      "_nota": "Precio de lista de la sucursal (lista 2 en Ayacucho/Rauch/Madariaga, lista 3 en el resto) dividido 1,21. Ver lib/precios/resolver-precio.ts",
+      "template": "Precio sin imp. nacionales: {articulo.precio_sin_impuestos}",
+      "format": "moneda_ars_2_decimales",
+      "x": 3.0,
+      "baseline_y": 28.3,
+      "w": 49.0,
+      "font": "bold",
+      "size_pt": 5.6,
+      "min_size_pt": 4.4,
+      "color": "ink",
+      "align": "left",
+      "ajustar_a_w": true,
+      "omitir_si_vacio": true
     },
     {
       "id": "pill_legal",
@@ -154,12 +171,12 @@
       "x": 2.5,
       "y": 22.7,
       "w": 27.3,
-      "h": 2.2,
+      "h": 2.6,
       "fill": "ink",
       "label": {
         "text": "Precios c/imp. nacionales.",
         "font": "regular",
-        "size_pt": 3.4,
+        "size_pt": 4.5,
         "color": "white"
       }
     },
@@ -174,6 +191,6 @@
     }
   ],
   "pendientes": [
-    "2026-09-25 v2: corregida la orientacion (3cm alto x 5,5cm largo -- la v1 la tenia al reves). Se adapto por escala desde la plantilla grande de Casa Moda (mismo layout: pill + precio en la misma fila, texto legal + logo en la fila de abajo) en vez de rearmarla de cero. Pendiente de que Lucila la vea impresa y confirme tamaños."
+    "2026-09-25 v2: corregida la orientacion (3cm alto x 5,5cm largo -- la v1 la tenia al reves). Se adapto por escala desde la plantilla grande de Casa Moda (mismo layout: pill + precio en la misma fila, texto legal + logo en la fila de abajo) en vez de rearmarla de cero. Pendiente de que Lucila la vea impresa y confirme tamaños. 2026-10-15: tipografias agrandadas (titulo 6.6pt, pills 5.4pt, codigo 5.6pt, leyenda legal 4.5pt) a pedido de las sucursales."
   ]
 }
