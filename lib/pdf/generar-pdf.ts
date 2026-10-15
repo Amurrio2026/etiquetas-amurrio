@@ -5,6 +5,7 @@ import type { ArticuloConPrecio, FormatoHoja, Plantilla, PlantillaElemento } fro
 import { cargarFuentesDePlantilla, type JuegoFuentes } from "@/lib/pdf/fonts";
 import { paginarEtiquetas, type Hoja } from "@/lib/pdf/paginar";
 import type { LineaEtiqueta } from "@/types";
+import { precioSinImpuestosNacionales } from "@/lib/precios/resolver-precio";
 
 const PT_POR_MM = 2.8346456693;
 const mm = (v: number) => v * PT_POR_MM;
@@ -38,6 +39,11 @@ function formatearValor(valor: unknown, formato: string | undefined): string {
     const n = Math.round(Number(valor) || 0);
     return "$" + n.toLocaleString("es-AR", { maximumFractionDigits: 0 });
   }
+  if (formato === "moneda_ars_2_decimales") {
+    if (valor === null || valor === undefined) return "-";
+    const n = Number(valor) || 0;
+    return "$" + n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
   return String(valor ?? "");
 }
 
@@ -61,13 +67,20 @@ const ALIAS_CAMPO: Record<string, keyof ArticuloConPrecio> = {
 function resolverCampo(ruta: string, articulo: ArticuloConPrecio): unknown {
   const partes = ruta.split(".");
   if (partes[0] !== "articulo") return undefined;
+  // Calculado: precio de lista de la sucursal / 1,21 (ver resolver-precio.ts)
+  if (partes[1] === "precio_sin_impuestos") return precioSinImpuestosNacionales(articulo.precioLista);
   const clave = ALIAS_CAMPO[partes[1]];
   if (!clave) return undefined;
   return clave === "codigoBarra" ? articulo.codigoBarra ?? articulo.sku : articulo[clave];
 }
 
 function resolverTemplateTexto(tpl: string, articulo: ArticuloConPrecio): string {
-  return tpl.replace(/\{([^}]+)\}/g, (_match, ruta) => String(resolverCampo(ruta, articulo) ?? ""));
+  return tpl.replace(/\{([^}]+)\}/g, (_match, ruta) => {
+    const v = resolverCampo(ruta, articulo);
+    // El precio sin impuestos se imprime como moneda con 2 decimales (ej. $826,45).
+    if (ruta === "articulo.precio_sin_impuestos") return v === null || v === undefined ? "" : formatearValor(v, "moneda_ars_2_decimales");
+    return String(v ?? "");
+  });
 }
 
 /** Dibuja texto con separacion entre letras (usado en "Codigo: xxxx"). */
@@ -283,12 +296,26 @@ async function dibujarEtiqueta(
 
     if (el.type === "text") {
       const font = fuentePorRol(fuentes, el.font);
-      const size = el.size_pt;
+      let size = el.size_pt;
       const color = colorDePaleta(plantilla, el.color);
 
       let texto: string;
       if (el.template) texto = resolverTemplateTexto(el.template, articulo);
       else texto = formatearValor(resolverCampo(el.field, articulo), el.format);
+
+      // Elementos opcionales (ej. precio sin impuestos nacionales): si no hay dato, no se dibuja.
+      if (el.omitir_si_vacio && el.template) {
+        const vacio = [...el.template.matchAll(/\{([^}]+)\}/g)].some((m) => {
+          const v = resolverCampo(m[1], articulo);
+          return v === null || v === undefined || v === "";
+        });
+        if (vacio) continue;
+      }
+      // Achica la letra (hasta min_size_pt) si el texto no entra en `w`.
+      if (el.ajustar_a_w && typeof el.baseline_y === "number") {
+        const minimo = typeof el.min_size_pt === "number" ? el.min_size_pt : size - 1.5;
+        while (size > minimo && font.widthOfTextAtSize(texto, size) > mm(el.w)) size -= 0.1;
+      }
 
       if (typeof el.baseline_y === "number") {
         // Texto de una linea con posicion de base ya calculada (precios, codigo).
