@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 
 interface Props {
   onScan: (codigo: string) => void;
+  /** true = escaner pausado (tras agregar un articulo): ignora lecturas hasta que se lo reactive. */
+  bloqueado?: boolean;
+  onDesbloquear?: () => void;
 }
 
 const ID_CAMARA = "lector-camara";
@@ -14,9 +17,33 @@ const ID_CAMARA = "lector-camara";
  *   input siempre enfocado que dispara onScan al apretar Enter.
  * - Camara en celular/tablet: boton para activarla, usa html5-qrcode.
  */
-export default function Escaner({ onScan }: Props) {
+export default function Escaner({ onScan, bloqueado = false, onDesbloquear }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [camaraActiva, setCamaraActiva] = useState(false);
+  const bloqueadoRef = useRef(bloqueado);
+  bloqueadoRef.current = bloqueado;
+  // Si la camara estaba prendida al pausar, se vuelve a prender al reactivar.
+  const camaraEstabaActiva = useRef(false);
+  const camaraActivaRef = useRef(false);
+  camaraActivaRef.current = camaraActiva;
+
+  useEffect(() => {
+    if (bloqueado) {
+      camaraEstabaActiva.current = camaraActivaRef.current;
+      if (camaraActivaRef.current) setCamaraActiva(false);
+      if (temporizadorRef.current) clearTimeout(temporizadorRef.current);
+      tiemposRef.current = [];
+      largoPrevioRef.current = 0;
+      if (inputRef.current) inputRef.current.value = "";
+    } else {
+      if (camaraEstabaActiva.current) {
+        camaraEstabaActiva.current = false;
+        setCamaraActiva(true);
+      } else {
+        setTimeout(() => inputRef.current?.focus(), 50);
+      }
+    }
+  }, [bloqueado]);
   const [errorCamara, setErrorCamara] = useState<string | null>(null);
   // Ultimo texto que llego del lector/teclado/camara (ayuda a ver que manda realmente el lector).
   const [ultimoLeido, setUltimoLeido] = useState<string | null>(null);
@@ -47,6 +74,8 @@ export default function Escaner({ onScan }: Props) {
   }, [camaraActiva]);
 
   function emitirCodigo(codigo: string) {
+    // Escaner pausado: se ignora cualquier lectura (evita sumar etiquetas por escanear de nuevo).
+    if (bloqueadoRef.current) return;
     // Saca el prefijo AIM que agregan algunos lectores (ej. "]C1" delante de BYM1131280).
     const limpio = codigo.trim().replace(/^\][A-Za-z][0-9A-Za-z]/, "").trim();
     if (!limpio) return;
@@ -168,7 +197,8 @@ export default function Escaner({ onScan }: Props) {
         <button
           type="button"
           onClick={camaraActiva ? detenerCamara : activarCamara}
-          className="text-xs font-medium px-3 py-1.5 rounded-md bg-gray-900 text-white hover:bg-gray-700"
+          disabled={bloqueado}
+          className="text-xs font-medium px-3 py-1.5 rounded-md bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-40"
         >
           {camaraActiva ? "Apagar cámara" : "Usar cámara"}
         </button>
@@ -194,10 +224,24 @@ export default function Escaner({ onScan }: Props) {
           ref={inputRef}
           onInput={alEscribir}
           autoFocus
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-          placeholder="Escaneá con el lector o escribí el código y apretá Enter"
+          disabled={bloqueado}
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100 disabled:text-gray-400"
+          placeholder={
+            bloqueado
+              ? "Escáner pausado — tocá “Escanear otro artículo”"
+              : "Escaneá con el lector o escribí el código y apretá Enter"
+          }
         />
       </form>
+      {bloqueado && (
+        <button
+          type="button"
+          onClick={onDesbloquear}
+          className="mt-3 w-full rounded-md bg-gray-900 text-white text-sm font-semibold px-4 py-3 hover:bg-gray-700"
+        >
+          Escanear otro artículo
+        </button>
+      )}
       {ultimoLeido && (
         <p className="mt-2 text-xs text-gray-600">
           Último código leído: <span className="font-mono font-semibold">{ultimoLeido}</span> ({ultimoLeido.length} caracteres)
