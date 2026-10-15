@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Escaner from "@/components/Escaner";
 import ListadoEtiquetas, { type LineaUI } from "@/components/ListadoEtiquetas";
 import SelectorSucursal from "@/components/SelectorSucursal";
@@ -16,6 +16,30 @@ function formatearPrecio(v: number | null): string {
   return v === null ? "sin precio cargado" : `$${Math.round(v).toLocaleString("es-AR")}`;
 }
 
+/** Beep corto de confirmacion: uno agudo = agregado; dos graves = ya estaba cargado. */
+function sonarBeep(repetido: boolean) {
+  try {
+    const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const tonos = repetido ? [330, 330] : [880];
+    tonos.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.value = freq;
+      gain.gain.value = 0.08;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const t0 = ctx.currentTime + i * 0.18;
+      osc.start(t0);
+      osc.stop(t0 + 0.12);
+    });
+    setTimeout(() => ctx.close().catch(() => {}), 800);
+  } catch {
+    // sin audio no pasa nada, queda el cartel visual
+  }
+}
+
 export default function Home() {
   const [modo, setModo] = useState<Modo>("escaneo");
 
@@ -29,6 +53,17 @@ export default function Home() {
   const [articuloEncontrado, setArticuloEncontrado] = useState<ArticuloConPrecio | null>(null);
   const [cantidadPendiente, setCantidadPendiente] = useState(1);
   const [aviso, setAviso] = useState<{ tipo: "error" | "info" | "ok"; texto: string } | null>(null);
+
+  const [confirmacion, setConfirmacion] = useState<{
+    descripcion: string;
+    sku: string;
+    cantidad: number;
+    repetido: boolean;
+  } | null>(null);
+  const temporizadorConfirmacion = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Copia siempre actual del listado, para saber la cantidad real dentro de handlers async.
+  const lineasRef = useRef<LineaUI[]>([]);
+  lineasRef.current = lineas;
 
   const [resultadoMasivo, setResultadoMasivo] = useState<ResultadoValidacion | null>(null);
   const [resultadoContenedor, setResultadoContenedor] = useState<ResultadoValidacion | null>(null);
@@ -121,6 +156,8 @@ export default function Home() {
       }
       // Se agrega directo al listado con 1 etiqueta (si ya estaba, suma 1).
       // La cantidad se puede cambiar despues desde el listado.
+      const previa = lineasRef.current.find((l) => l.articulo.sku === articulo.sku);
+      const nuevaCantidad = (previa?.cantidad ?? 0) + 1;
       setLineas((prev) => {
         const existe = prev.find((l) => l.articulo.sku === articulo.sku);
         if (existe) {
@@ -128,7 +165,17 @@ export default function Home() {
         }
         return [...prev, { articulo, cantidad: 1 }];
       });
-      setAviso({ tipo: "ok", texto: `Agregado: ${articulo.descripcion} (${articulo.sku})` });
+      // Confirmacion bien visible (cartel junto al escaner + fila resaltada + beep).
+      // Si el articulo ya estaba cargado se avisa distinto (amarillo) para que se note.
+      setConfirmacion({
+        descripcion: articulo.descripcion,
+        sku: articulo.sku,
+        cantidad: nuevaCantidad,
+        repetido: Boolean(previa),
+      });
+      sonarBeep(Boolean(previa));
+      if (temporizadorConfirmacion.current) clearTimeout(temporizadorConfirmacion.current);
+      temporizadorConfirmacion.current = setTimeout(() => setConfirmacion(null), 6000);
     } catch {
       setAviso({ tipo: "error", texto: "No se pudo consultar la base de artículos. Probá de nuevo." });
     }
@@ -342,6 +389,31 @@ export default function Home() {
           <>
             <Escaner onScan={alEscanear} />
 
+            {confirmacion && (
+              <div
+                className={
+                  "rounded-lg border-2 px-4 py-3 text-sm " +
+                  (confirmacion.repetido
+                    ? "border-amber-400 bg-amber-50 text-amber-900"
+                    : "border-green-500 bg-green-50 text-green-900")
+                }
+              >
+                <p className="font-bold text-base">
+                  {confirmacion.repetido
+                    ? `⚠ Ya estaba cargado — ahora lleva ${confirmacion.cantidad} etiquetas`
+                    : "✔ Agregado a la lista (1 etiqueta)"}
+                </p>
+                <p>
+                  {confirmacion.descripcion} · <span className="font-mono">{confirmacion.sku}</span>
+                </p>
+                {confirmacion.repetido && (
+                  <p className="text-xs mt-1">
+                    Si fue sin querer, corregí la cantidad en el listado de abajo.
+                  </p>
+                )}
+              </div>
+            )}
+
             {articuloEncontrado && (
               <div className="rounded-lg border border-gray-900 bg-white p-4 shadow-sm">
                 <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">Artículo encontrado</p>
@@ -384,6 +456,7 @@ export default function Home() {
               onCambiarCantidad={cambiarCantidad}
               onEliminar={eliminarLinea}
               precioUnico={Boolean(sucursalActual?.precioUnico)}
+              resaltarSku={confirmacion?.sku ?? null}
             />
           </>
         ) : modo === "masivo" ? (
