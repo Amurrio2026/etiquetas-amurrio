@@ -111,14 +111,24 @@ export default function Home() {
       }
       if (!res.ok) throw new Error("error de conexión");
       const articulo: ArticuloConPrecio = await res.json();
-      setArticuloEncontrado(articulo);
-      setCantidadPendiente(1);
+      setArticuloEncontrado(null);
       if (articulo.precioEfectivo === null && articulo.precioLista === null) {
         setAviso({
           tipo: "error",
           texto: `${articulo.descripcion} todavía no tiene ningún precio cargado en esta sucursal.`,
         });
+        return;
       }
+      // Se agrega directo al listado con 1 etiqueta (si ya estaba, suma 1).
+      // La cantidad se puede cambiar despues desde el listado.
+      setLineas((prev) => {
+        const existe = prev.find((l) => l.articulo.sku === articulo.sku);
+        if (existe) {
+          return prev.map((l) => (l.articulo.sku === articulo.sku ? { ...l, cantidad: l.cantidad + 1 } : l));
+        }
+        return [...prev, { articulo, cantidad: 1 }];
+      });
+      setAviso({ tipo: "ok", texto: `Agregado: ${articulo.descripcion} (${articulo.sku})` });
     } catch {
       setAviso({ tipo: "error", texto: "No se pudo consultar la base de artículos. Probá de nuevo." });
     }
