@@ -14,9 +14,17 @@ interface Props {
   onEliminar: (sku: string) => void;
   /** Sucursal de precio unico (Rauch/Ayacucho/Madariaga): no se muestra la columna Efectivo. */
   precioUnico?: boolean;
+  /** SKU recien agregado/escaneado: se resalta su fila. */
+  resaltarSku?: string | null;
 }
 
-export default function ListadoEtiquetas({ lineas, onCambiarCantidad, onEliminar, precioUnico = false }: Props) {
+export default function ListadoEtiquetas({
+  lineas,
+  onCambiarCantidad,
+  onEliminar,
+  precioUnico = false,
+  resaltarSku = null,
+}: Props) {
   const totalDistintos = lineas.length;
   const totalEtiquetas = lineas.reduce((acc, l) => acc + l.cantidad, 0);
 
@@ -47,7 +55,13 @@ export default function ListadoEtiquetas({ lineas, onCambiarCantidad, onEliminar
             </thead>
             <tbody>
               {lineas.map((l) => (
-                <tr key={l.articulo.sku} className="border-b border-gray-100 last:border-0">
+                <tr
+                  key={l.articulo.sku}
+                  className={
+                    "border-b border-gray-100 last:border-0 " +
+                    (resaltarSku === l.articulo.sku ? "bg-green-100" : "")
+                  }
+                >
                   <td className="py-2 pr-2">{l.articulo.descripcion}</td>
                   <td className="py-2 pr-2 font-mono text-xs text-gray-500">{l.articulo.sku}</td>
                   {!precioUnico && (
