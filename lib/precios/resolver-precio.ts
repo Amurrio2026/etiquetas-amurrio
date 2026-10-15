@@ -15,6 +15,19 @@ export function esPrecioUnico(sucursal: Sucursal): boolean {
   return NOMBRES_LISTA2.has(sucursal.nombre);
 }
 
+/**
+ * Divisor para obtener el "precio sin impuestos nacionales" a partir del precio
+ * de Lista de la sucursal (2026-10-15, pedido de Lucila): precio de lista / 1,21.
+ * Lista = lista 2 en Ayacucho/Rauch/Madariaga y lista 3 en el resto, o sea que ya
+ * llega resuelto en `precioLista` (ver resolverPrecios). Redondeado a 2 decimales.
+ */
+export const DIVISOR_IMPUESTOS_NACIONALES = 1.21;
+
+export function precioSinImpuestosNacionales(precioLista: number | null | undefined): number | null {
+  if (precioLista === null || precioLista === undefined || !(precioLista > 0)) return null;
+  return Math.round((precioLista / DIVISOR_IMPUESTOS_NACIONALES) * 100) / 100;
+}
+
 export type ListaPrecio = "lista2" | "lista3" | "lista6";
 
 /**
