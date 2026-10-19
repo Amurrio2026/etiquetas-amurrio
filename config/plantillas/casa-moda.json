@@ -37,10 +37,11 @@
       "w": 73,
       "h": 4.5,
       "font": "regular",
-      "size_pt": 7.5,
+      "size_pt": 8.0,
       "color": "ink",
       "align": "center",
-      "valign": "top"
+      "valign": "top",
+      "min_size_pt": 5.5
     },
     {
       "id": "linea_1",
@@ -63,7 +64,7 @@
       "label": {
         "text": "Precio Efectivo",
         "font": "bold",
-        "size_pt": 6,
+        "size_pt": 6.5,
         "color": "ink"
       },
       "solo_dos_precios": true
@@ -76,12 +77,14 @@
       "format": "moneda_ars_sin_decimales",
       "x": 24.6,
       "baseline_y": 15.1,
-      "w": 46,
+      "w": 51.4,
       "font": "extrabold",
-      "size_pt": 23,
+      "size_pt": 26,
       "color": "ink",
       "align": "left",
-      "solo_dos_precios": true
+      "solo_dos_precios": true,
+      "ajustar_a_w": true,
+      "min_size_pt": 12
     },
     {
       "id": "linea_2",
@@ -105,7 +108,7 @@
       "label": {
         "text": "Precio de Lista",
         "font": "bold",
-        "size_pt": 6,
+        "size_pt": 6.5,
         "color": "ink"
       },
       "dy_precio_unico": -5.3
@@ -118,12 +121,14 @@
       "format": "moneda_ars_sin_decimales",
       "x": 24.6,
       "baseline_y": 25.5,
-      "w": 42,
+      "w": 51.4,
       "font": "extrabold",
-      "size_pt": 21,
+      "size_pt": 24,
       "color": "ink",
       "align": "left",
-      "dy_precio_unico": -5.3
+      "dy_precio_unico": -5.3,
+      "ajustar_a_w": true,
+      "min_size_pt": 12
     },
     {
       "id": "linea_3",

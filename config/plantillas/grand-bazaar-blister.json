@@ -32,12 +32,12 @@
       "type": "text",
       "field": "articulo.descripcion",
       "x": 3.5,
-      "y": 1.5,
+      "y": 1.0,
       "w": 48,
       "h": 4,
       "font": "regular",
-      "size_pt": 5.2,
-      "min_size_pt": 4,
+      "size_pt": 7.0,
+      "min_size_pt": 4.6,
       "color": "ink",
       "align": "center",
       "valign": "top"
@@ -63,7 +63,7 @@
       "label": {
         "text": "Efectivo",
         "font": "bold",
-        "size_pt": 4,
+        "size_pt": 5.0,
         "color": "ink"
       },
       "solo_dos_precios": true
@@ -76,12 +76,14 @@
       "format": "moneda_ars_sin_decimales",
       "x": 16.5,
       "baseline_y": 10.2,
-      "w": 25,
+      "w": 35.1,
       "font": "extrabold",
-      "size_pt": 14,
+      "size_pt": 18,
       "color": "ink",
       "align": "left",
-      "solo_dos_precios": true
+      "solo_dos_precios": true,
+      "ajustar_a_w": true,
+      "min_size_pt": 12
     },
     {
       "id": "linea_2",
@@ -105,7 +107,7 @@
       "label": {
         "text": "Lista",
         "font": "bold",
-        "size_pt": 4,
+        "size_pt": 5.0,
         "color": "ink"
       },
       "dy_precio_unico": -3.25
@@ -118,12 +120,14 @@
       "format": "moneda_ars_sin_decimales",
       "x": 16.5,
       "baseline_y": 17.0,
-      "w": 22,
+      "w": 35.1,
       "font": "extrabold",
-      "size_pt": 13,
+      "size_pt": 16.5,
       "color": "ink",
       "align": "left",
-      "dy_precio_unico": -3.25
+      "dy_precio_unico": -3.25,
+      "ajustar_a_w": true,
+      "min_size_pt": 12
     },
     {
       "id": "linea_3",

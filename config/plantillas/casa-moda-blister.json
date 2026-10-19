@@ -32,12 +32,12 @@
       "type": "text",
       "field": "articulo.descripcion",
       "x": 2.4,
-      "y": 1.4,
+      "y": 1.0,
       "w": 50,
       "h": 3.4,
       "font": "regular",
-      "size_pt": 6.6,
-      "min_size_pt": 5,
+      "size_pt": 7.5,
+      "min_size_pt": 4.6,
       "color": "ink",
       "align": "center",
       "valign": "top"
@@ -76,12 +76,14 @@
       "format": "moneda_ars_sin_decimales",
       "x": 16.9,
       "baseline_y": 10.4,
-      "w": 32,
+      "w": 35.7,
       "font": "extrabold",
-      "size_pt": 15.8,
+      "size_pt": 19,
       "color": "ink",
       "align": "left",
-      "solo_dos_precios": true
+      "solo_dos_precios": true,
+      "ajustar_a_w": true,
+      "min_size_pt": 12
     },
     {
       "id": "linea_2",
@@ -118,12 +120,14 @@
       "format": "moneda_ars_sin_decimales",
       "x": 16.9,
       "baseline_y": 17.5,
-      "w": 29,
+      "w": 35.7,
       "font": "extrabold",
-      "size_pt": 14.4,
+      "size_pt": 17,
       "color": "ink",
       "align": "left",
-      "dy_precio_unico": -3.65
+      "dy_precio_unico": -3.65,
+      "ajustar_a_w": true,
+      "min_size_pt": 12
     },
     {
       "id": "linea_3",
