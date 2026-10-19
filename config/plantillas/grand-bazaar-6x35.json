@@ -1,0 +1,209 @@
+{
+  "id": "grand-bazaar-6x35",
+  "marca": "Grand Bazaar",
+  "_fuente": "2026-10-19: medida 6x3,5cm (6x3.5cm, ancho x alto). Escalada desde la plantilla grande de Grand Bazaar con la MISMA tipografia; solo se ajustaron los tamaños de letra.",
+  "label": {
+    "width_mm": 60,
+    "height_mm": 35,
+    "background": "#FFFFFF"
+  },
+  "palette": {
+    "ink": "#231F20",
+    "grey": "#D1D3D4",
+    "white": "#FFFFFF"
+  },
+  "fonts": {
+    "_decision": "2026-09-02: se usa Baloo 2 (Google Fonts, libre) hasta que exista licencia de Gilroy con comprobante y cobertura de uso en software. Cambiar acá reemplaza la fuente en toda la etiqueta.",
+    "regular": {
+      "family": "Baloo 2",
+      "weight": 500
+    },
+    "bold": {
+      "family": "Baloo 2",
+      "weight": 700
+    },
+    "extrabold": {
+      "family": "Baloo 2",
+      "weight": 800
+    }
+  },
+  "elements": [
+    {
+      "id": "banda_inferior",
+      "type": "rect",
+      "x": 0.0,
+      "y": 29.06,
+      "w": 60.0,
+      "h": 5.94,
+      "fill": "grey"
+    },
+    {
+      "id": "titulo",
+      "type": "text",
+      "field": "articulo.descripcion",
+      "x": 3.98,
+      "y": 2.33,
+      "w": 52.04,
+      "h": 2.62,
+      "font": "regular",
+      "size_pt": 7.0,
+      "color": "ink",
+      "align": "center",
+      "valign": "top",
+      "min_size_pt": 4.2
+    },
+    {
+      "id": "linea_1",
+      "type": "rule_con_puntas",
+      "y": 6.27,
+      "x0": 3.92,
+      "x1": 55.78,
+      "color": "grey",
+      "grosor_pt": 0.5,
+      "diametro_punta_mm": 0.8
+    },
+    {
+      "id": "pill_efectivo",
+      "type": "pill",
+      "x": 3.67,
+      "y": 8.82,
+      "w": 12.55,
+      "h": 3.14,
+      "fill": "grey",
+      "label": {
+        "text": "Efectivo",
+        "font": "bold",
+        "size_pt": 5.0,
+        "color": "ink"
+      },
+      "solo_dos_precios": true
+    },
+    {
+      "id": "precio_efectivo",
+      "type": "text",
+      "field": "articulo.precio_efectivo",
+      "_nota": "RESUELTO (2026-09-04): precio_lista6 de la base (el que se cobra en caja), resuelto en lib/precios/resolver-precio.ts. Antes era igual a precio_lista como placeholder -- ya no.",
+      "format": "moneda_ars_sin_decimales",
+      "x": 17.24,
+      "baseline_y": 12.54,
+      "w": 27.86,
+      "font": "extrabold",
+      "size_pt": 18,
+      "color": "ink",
+      "align": "left",
+      "solo_dos_precios": true
+    },
+    {
+      "id": "linea_2",
+      "type": "rule_con_puntas",
+      "y": 14.8,
+      "x0": 3.92,
+      "x1": 55.78,
+      "color": "grey",
+      "grosor_pt": 0.5,
+      "diametro_punta_mm": 0.8,
+      "solo_dos_precios": true
+    },
+    {
+      "id": "pill_lista",
+      "type": "pill",
+      "x": 3.67,
+      "y": 17.28,
+      "w": 12.55,
+      "h": 3.14,
+      "fill": "grey",
+      "label": {
+        "text": "Lista",
+        "font": "bold",
+        "size_pt": 5.0,
+        "color": "ink"
+      },
+      "dy_precio_unico": -4.23
+    },
+    {
+      "id": "precio_lista",
+      "type": "text",
+      "field": "articulo.precio_lista",
+      "_nota": "RESUELTO (2026-09-04): precio_lista2 (Ayacucho/Rauch/Madariaga) o precio_lista3 (resto), segun sucursal -- ver lib/precios/resolver-precio.ts.",
+      "format": "moneda_ars_sin_decimales",
+      "x": 17.24,
+      "baseline_y": 20.85,
+      "w": 24.49,
+      "font": "extrabold",
+      "size_pt": 16.5,
+      "color": "ink",
+      "align": "left",
+      "dy_precio_unico": -4.23
+    },
+    {
+      "id": "linea_3",
+      "type": "rule_con_puntas",
+      "y": 22.82,
+      "x0": 3.92,
+      "x1": 55.78,
+      "color": "grey",
+      "grosor_pt": 0.5,
+      "diametro_punta_mm": 0.8
+    },
+    {
+      "id": "codigo",
+      "type": "text",
+      "template": "Código: {articulo.codigo_barra}",
+      "x": 4.9,
+      "baseline_y": 26.69,
+      "w": 30.61,
+      "font": "regular",
+      "size_pt": 5.2,
+      "color": "ink",
+      "align": "left",
+      "letter_spacing_mm": 0.21
+    },
+    {
+      "id": "precio_sin_impuestos",
+      "type": "text",
+      "_nota": "Precio de lista de la sucursal (lista 2 en Ayacucho/Rauch/Madariaga, lista 3 en el resto) dividido 1,21. Ver lib/precios/resolver-precio.ts",
+      "template": "Precio sin imp. nacionales: {articulo.precio_sin_impuestos}",
+      "format": "moneda_ars_2_decimales",
+      "x": 4.08,
+      "baseline_y": 33.03,
+      "w": 40.41,
+      "font": "bold",
+      "size_pt": 5.2,
+      "min_size_pt": 3.9,
+      "color": "ink",
+      "align": "left",
+      "ajustar_a_w": true,
+      "omitir_si_vacio": true
+    },
+    {
+      "id": "pill_legal",
+      "type": "pill",
+      "x": 4.08,
+      "y": 28.14,
+      "w": 27.73,
+      "h": 2.27,
+      "fill": "ink",
+      "label": {
+        "text": "Precios c/imp. nacionales.",
+        "font": "regular",
+        "size_pt": 4.3,
+        "color": "white"
+      }
+    },
+    {
+      "id": "logo",
+      "type": "image",
+      "asset": "logos/grand-bazaar.png",
+      "align_right_margin_mm": 3.98,
+      "align_bottom_margin_mm": 3.79,
+      "w": 10.16,
+      "h": 5.33,
+      "_nota": "PNG transparente ya generado (negro #231F20 + blanco, fondo transparente) a partir del isologo que mandó Lucila — mismo trazo que el del PDF original"
+    }
+  ],
+  "pendientes": [
+    "RESUELTO (2026-09-04): Precio Efectivo y Precio de Lista ya se resuelven por separado (lista6 / lista2-lista3 segun sucursal) -- ver lib/precios/resolver-precio.ts.",
+    "RESUELTO (2026-09-02): logo ya extraído como PNG transparente (logos/grand-bazaar.png) a partir de la foto que mandó Lucila. Se recortó el fondo y se recoloreó el trazo azul a negro #231F20 para que coincida con el impreso; se verificó que las letras queden blancas tanto sobre blanco como sobre la franja gris.",
+    "RESUELTO (2026-09-02): se sigue con Baloo 2 (libre) mientras se define la licencia de Gilroy con la diseñadora. Los archivos Gilroy que se recibieron no traían comprobante de compra y, aunque lo tuvieran, esa licencia puntual no cubre uso dentro de una aplicación. Si más adelante llega una licencia válida para software, el cambio es solo editar el bloque 'fonts' de este archivo."
+  ]
+}
