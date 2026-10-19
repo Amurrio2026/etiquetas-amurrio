@@ -44,13 +44,15 @@
       "x": 5.64,
       "y": 2.67,
       "w": 73.72,
-      "h": 3.0,
+      "h": 4.0,
       "font": "regular",
       "size_pt": 8.0,
       "color": "ink",
       "align": "center",
       "valign": "top",
-      "min_size_pt": 4.8
+      "min_size_pt": 4.8,
+      "max_size_pt": 13,
+      "_nota": "Descripcion al maximo tamaño posible: entre max_size_pt y min_size_pt, en 1 o 2 lineas dentro de la caja (ver mejorAjusteTexto en lib/pdf/generar-pdf.ts)."
     },
     {
       "id": "linea_1",
