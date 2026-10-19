@@ -146,6 +146,43 @@ function ajustarTextoACaja(
   return { lineas, size };
 }
 
+/**
+ * Busca el tamaño de letra MAS GRANDE (de `sizeMax` hacia abajo, hasta `sizeMin`) con el
+ * que el texto entra en la caja: en 1 linea (ancho y alto de la caja) o, si no, en
+ * 2 lineas (cada una dentro del ancho y las dos dentro del alto). Devuelve null si no
+ * entra ni al tamaño minimo (el llamador usa entonces ajustarTextoACaja).
+ */
+function mejorAjusteTexto(
+  font: PDFFont,
+  texto: string,
+  anchoPt: number,
+  altoPt: number,
+  sizeMax: number,
+  sizeMin: number
+): { lineas: string[]; size: number } | null {
+  for (let size = sizeMax; size >= sizeMin - 0.001; size -= 0.25) {
+    if (size <= altoPt && font.widthOfTextAtSize(texto, size) <= anchoPt) return { lineas: [texto], size };
+    if (size * 1.15 * 2 <= altoPt) {
+      const palabras = texto.split(" ");
+      // Corte equilibrado: se prueba cada punto de corte y se elige el que deja
+      // la linea mas ancha lo mas corta posible.
+      let mejor: string[] | null = null;
+      let mejorAncho = Infinity;
+      for (let i = 1; i < palabras.length; i++) {
+        const l1 = palabras.slice(0, i).join(" ");
+        const l2 = palabras.slice(i).join(" ");
+        const a = Math.max(font.widthOfTextAtSize(l1, size), font.widthOfTextAtSize(l2, size));
+        if (a <= anchoPt && a < mejorAncho) {
+          mejor = [l1, l2];
+          mejorAncho = a;
+        }
+      }
+      if (mejor) return { lineas: mejor, size };
+    }
+  }
+  return null;
+}
+
 /** Dibuja una linea punteada entre dos puntos (usada para la guia de corte). */
 function dibujarLineaPunteada(
   page: PDFPage,
@@ -342,7 +379,16 @@ async function dibujarEtiqueta(
       const anchoDisponiblePt = boxWPt - mm(1); // un pelo de margen a cada lado
 
       const sizeMinimo = typeof el.min_size_pt === "number" ? el.min_size_pt : Math.max(5, size - 2.5);
-      const { lineas: lineasTexto, size: sizeAjustado } = ajustarTextoACaja(font, texto, anchoDisponiblePt, size, sizeMinimo);
+      // Descripcion "lo mas grande posible": si la plantilla trae max_size_pt, se busca el
+      // tamaño mas grande (entre max_size_pt y min_size_pt) con el que el texto entra en
+      // 1 linea, o en 2 lineas dentro del alto de la caja. Si no hay ninguno, se usa
+      // el ajuste de siempre.
+      const mejor =
+        typeof el.max_size_pt === "number" && boxHPt > 0
+          ? mejorAjusteTexto(font, texto, anchoDisponiblePt, boxHPt, el.max_size_pt, sizeMinimo)
+          : null;
+      const { lineas: lineasTexto, size: sizeAjustado } =
+        mejor ?? ajustarTextoACaja(font, texto, anchoDisponiblePt, size, sizeMinimo);
 
       const xParaLinea = (linea: string): number => {
         const anchoLinea = font.widthOfTextAtSize(linea, sizeAjustado);
