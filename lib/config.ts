@@ -8,6 +8,12 @@ import grandBazaar from "@/config/plantillas/grand-bazaar.json";
 import casaModa from "@/config/plantillas/casa-moda.json";
 import grandBazaarBlister from "@/config/plantillas/grand-bazaar-blister.json";
 import casaModaBlister from "@/config/plantillas/casa-moda-blister.json";
+import grand_bazaar_6x35 from "@/config/plantillas/grand-bazaar-6x35.json";
+import grand_bazaar_85x4 from "@/config/plantillas/grand-bazaar-85x4.json";
+import grand_bazaar_18x8 from "@/config/plantillas/grand-bazaar-18x8.json";
+import casa_moda_6x35 from "@/config/plantillas/casa-moda-6x35.json";
+import casa_moda_85x4 from "@/config/plantillas/casa-moda-85x4.json";
+import casa_moda_18x8 from "@/config/plantillas/casa-moda-18x8.json";
 import formatosHoja from "@/config/formatos-hoja.json";
 
 const MARCA_A_PLANTILLA: Record<string, Plantilla> = {
@@ -25,6 +31,12 @@ const PLANTILLAS_POR_ID: Record<string, Plantilla> = {
   "casa-moda": casaModa as unknown as Plantilla,
   "grand-bazaar-blister": grandBazaarBlister as unknown as Plantilla,
   "casa-moda-blister": casaModaBlister as unknown as Plantilla,
+  "grand-bazaar-6x35": grand_bazaar_6x35 as unknown as Plantilla,
+  "grand-bazaar-85x4": grand_bazaar_85x4 as unknown as Plantilla,
+  "grand-bazaar-18x8": grand_bazaar_18x8 as unknown as Plantilla,
+  "casa-moda-6x35": casa_moda_6x35 as unknown as Plantilla,
+  "casa-moda-85x4": casa_moda_85x4 as unknown as Plantilla,
+  "casa-moda-18x8": casa_moda_18x8 as unknown as Plantilla,
 };
 
 /** Devuelve la plantilla de etiqueta (JSON) de la marca de la sucursal elegida. */
