@@ -1,7 +1,7 @@
 {
   "id": "casa-moda-6x35",
   "marca": "Casa Moda",
-  "_fuente": "2026-10-19: medida 6x3,5cm (6x3.5cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra.",
+  "_fuente": "2026-10-19: medida 6x3,5cm (6x3.5cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra. 2026-10-19: precios 26/24 pt (CM) y 24/22 pt (GB), descripcion 8 pt, para acercarse al tamaño de letra de las etiquetas de la sucursal.",
   "label": {
     "width_mm": 60,
     "height_mm": 35,
@@ -37,11 +37,11 @@
       "w": 54.75,
       "h": 4.14,
       "font": "regular",
-      "size_pt": 7.0,
+      "size_pt": 8.0,
       "color": "ink",
       "align": "center",
       "valign": "top",
-      "min_size_pt": 4.2
+      "min_size_pt": 5.5
     },
     {
       "id": "linea_1",
@@ -77,12 +77,14 @@
       "format": "moneda_ars_sin_decimales",
       "x": 18.45,
       "baseline_y": 13.91,
-      "w": 34.5,
+      "w": 40.55,
       "font": "extrabold",
-      "size_pt": 18,
+      "size_pt": 26,
       "color": "ink",
       "align": "left",
-      "solo_dos_precios": true
+      "solo_dos_precios": true,
+      "ajustar_a_w": true,
+      "min_size_pt": 14
     },
     {
       "id": "linea_2",
@@ -119,12 +121,14 @@
       "format": "moneda_ars_sin_decimales",
       "x": 18.45,
       "baseline_y": 23.49,
-      "w": 31.5,
+      "w": 40.55,
       "font": "extrabold",
-      "size_pt": 16.5,
+      "size_pt": 24,
       "color": "ink",
       "align": "left",
-      "dy_precio_unico": -4.88
+      "dy_precio_unico": -4.88,
+      "ajustar_a_w": true,
+      "min_size_pt": 14
     },
     {
       "id": "linea_3",
