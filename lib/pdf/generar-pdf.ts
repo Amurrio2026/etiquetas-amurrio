@@ -266,6 +266,11 @@ async function dibujarEtiqueta(
   const elementos = (plantilla.elements as (PlantillaElemento & Record<string, any>)[]).flatMap((e) => {
     if (!precioUnico) return [e];
     if (e.solo_dos_precios) return [];
+    // Cambios propios del modo precio unico (posicion/tamaño de textos y lineas):
+    // se pisan los valores del elemento con los de "precio_unico".
+    if (e.precio_unico && typeof e.precio_unico === "object") {
+      return [{ ...e, ...e.precio_unico }];
+    }
     const dy = Number(e.dy_precio_unico ?? 0);
     if (!dy) return [e];
     const movido: PlantillaElemento & Record<string, any> = { ...e };
@@ -401,7 +406,12 @@ async function dibujarEtiqueta(
         // Una sola linea: misma posicion vertical de siempre (no cambia nada
         // para el caso comun de una descripcion que ya entraba bien).
         const baselineOffsetPt = sizeAjustado * 0.78;
-        const yTextoPt = pageHeightPt - boxYTopPt - baselineOffsetPt;
+        // Plantillas con tamaño automatico (max_size_pt): la descripcion de una sola
+        // linea se centra verticalmente en la caja (queda al medio, no pegada arriba).
+        const centrar = typeof el.max_size_pt === "number" && boxHPt > 0;
+        const yTextoPt = centrar
+          ? pageHeightPt - (boxYTopPt + boxHPt / 2) - sizeAjustado * 0.36
+          : pageHeightPt - boxYTopPt - baselineOffsetPt;
         page.drawText(lineasTexto[0], { x: xParaLinea(lineasTexto[0]), y: yTextoPt, size: sizeAjustado, font, color });
       } else {
         // Dos lineas: se acomodan centradas en el alto declarado de la caja
