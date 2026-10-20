@@ -1,7 +1,7 @@
 {
   "id": "grand-bazaar-85x4",
   "marca": "Grand Bazaar",
-  "_fuente": "2026-10-19: medida 8,5x4cm (8.5x4cm, ancho x alto). Escalada desde la plantilla grande de Grand Bazaar con la MISMA tipografia; solo se ajustaron los tamaños de letra.",
+  "_fuente": "2026-10-19: medida 8,5x4cm (8.5x4cm, ancho x alto). Escalada desde la plantilla grande de Grand Bazaar con la MISMA tipografia; solo se ajustaron los tamaños de letra. 2026-10-21: descripcion en negrita y precios bajados/centrados en sus filas para aprovechar el espacio libre sobre el codigo.",
   "label": {
     "width_mm": 85,
     "height_mm": 40,
@@ -45,7 +45,7 @@
       "y": 2.67,
       "w": 73.72,
       "h": 4.0,
-      "font": "regular",
+      "font": "bold",
       "size_pt": 8.0,
       "color": "ink",
       "align": "center",
@@ -68,7 +68,7 @@
       "id": "pill_efectivo",
       "type": "pill",
       "x": 5.2,
-      "y": 10.08,
+      "y": 10.56,
       "w": 17.78,
       "h": 3.58,
       "fill": "grey",
@@ -87,18 +87,20 @@
       "_nota": "RESUELTO (2026-09-04): precio_lista6 de la base (el que se cobra en caja), resuelto en lib/precios/resolver-precio.ts. Antes era igual a precio_lista como placeholder -- ya no.",
       "format": "moneda_ars_sin_decimales",
       "x": 24.42,
-      "baseline_y": 14.33,
-      "w": 39.46,
+      "baseline_y": 14.97,
+      "w": 54.6,
       "font": "extrabold",
       "size_pt": 24,
       "color": "ink",
       "align": "left",
-      "solo_dos_precios": true
+      "solo_dos_precios": true,
+      "ajustar_a_w": true,
+      "min_size_pt": 13.2
     },
     {
       "id": "linea_2",
       "type": "rule_con_puntas",
-      "y": 16.92,
+      "y": 17.52,
       "x0": 5.55,
       "x1": 79.02,
       "color": "grey",
@@ -110,7 +112,7 @@
       "id": "pill_lista",
       "type": "pill",
       "x": 5.2,
-      "y": 19.75,
+      "y": 20.61,
       "w": 17.78,
       "h": 3.58,
       "fill": "grey",
@@ -120,7 +122,7 @@
         "size_pt": 6.2,
         "color": "ink"
       },
-      "dy_precio_unico": -4.83
+      "dy_precio_unico": -5.18
     },
     {
       "id": "precio_lista",
@@ -129,18 +131,20 @@
       "_nota": "RESUELTO (2026-09-04): precio_lista2 (Ayacucho/Rauch/Madariaga) o precio_lista3 (resto), segun sucursal -- ver lib/precios/resolver-precio.ts.",
       "format": "moneda_ars_sin_decimales",
       "x": 24.42,
-      "baseline_y": 23.83,
-      "w": 34.69,
+      "baseline_y": 24.81,
+      "w": 54.6,
       "font": "extrabold",
       "size_pt": 22,
       "color": "ink",
       "align": "left",
-      "dy_precio_unico": -4.83
+      "dy_precio_unico": -5.18,
+      "ajustar_a_w": true,
+      "min_size_pt": 12.1
     },
     {
       "id": "linea_3",
       "type": "rule_con_puntas",
-      "y": 26.08,
+      "y": 27.28,
       "x0": 5.55,
       "x1": 79.02,
       "color": "grey",
