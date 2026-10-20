@@ -1,7 +1,7 @@
 {
   "id": "casa-moda-6x35",
   "marca": "Casa Moda",
-  "_fuente": "2026-10-19: medida 6x3,5cm (6x3.5cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra. 2026-10-19: precios 26/24 pt (CM) y 24/22 pt (GB), descripcion 8 pt, para acercarse al tamaño de letra de las etiquetas de la sucursal. 2026-10-20: franja de descripcion mas alta (2 lineas comodas) y precios algo mas chicos para que la descripcion se lea mas grande. 2026-10-20: modo precio unico (Rauch/Ayacucho/Madariaga) = sin pastilla 'Lista', precio mucho mas grande y descripcion con mas alto.",
+  "_fuente": "2026-10-19: medida 6x3,5cm (6x3.5cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra. 2026-10-19: precios 26/24 pt (CM) y 24/22 pt (GB), descripcion 8 pt, para acercarse al tamaño de letra de las etiquetas de la sucursal. 2026-10-20: franja de descripcion mas alta (2 lineas comodas) y precios algo mas chicos para que la descripcion se lea mas grande. 2026-10-20: modo precio unico (Rauch/Ayacucho/Madariaga) = sin pastilla 'Lista', precio mucho mas grande y descripcion con mas alto. 2026-10-21: precio Efectivo (lista 6) mas grande que el de Lista cuando la etiqueta trae dos precios. 2026-10-21: relacion Efectivo/Lista igual a la de Grand Bazaar.",
   "label": {
     "width_mm": 60,
     "height_mm": 35,
@@ -85,15 +85,15 @@
       "_nota": "RESUELTO (2026-09-04): precio_lista6 de la base (el que se cobra en caja), resuelto en lib/precios/resolver-precio.ts. Antes era igual a precio_lista como placeholder -- ya no.",
       "format": "moneda_ars_sin_decimales",
       "x": 18.45,
-      "baseline_y": 14.89,
-      "w": 40.55,
+      "baseline_y": 14.68,
+      "w": 38.93,
       "font": "extrabold",
-      "size_pt": 22,
+      "size_pt": 22.2,
       "color": "ink",
       "align": "left",
       "solo_dos_precios": true,
       "ajustar_a_w": true,
-      "min_size_pt": 14
+      "min_size_pt": 12.2
     },
     {
       "id": "linea_2",
@@ -131,14 +131,14 @@
       "_nota": "RESUELTO (2026-09-04): precio_lista2 (Ayacucho/Rauch/Madariaga) o precio_lista3 (resto), segun sucursal -- ver lib/precios/resolver-precio.ts.",
       "format": "moneda_ars_sin_decimales",
       "x": 18.45,
-      "baseline_y": 22.97,
-      "w": 40.55,
+      "baseline_y": 22.74,
+      "w": 38.93,
       "font": "extrabold",
       "size_pt": 21,
       "color": "ink",
       "align": "left",
       "ajustar_a_w": true,
-      "min_size_pt": 14,
+      "min_size_pt": 11.6,
       "precio_unico": {
         "baseline_y": 20.07,
         "size_pt": 25.7,

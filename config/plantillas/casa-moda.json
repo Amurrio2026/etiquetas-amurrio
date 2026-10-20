@@ -1,7 +1,7 @@
 {
   "id": "casa-moda",
   "marca": "Casa Moda",
-  "_fuente": "TAG PRECIOS 8x3,8_casamoda.pdf — medidas extraidas del PDF original, en mm salvo que se indique lo contrario 2026-10-20: modo precio unico (Rauch/Ayacucho/Madariaga) = sin pastilla 'Lista', precio mucho mas grande y descripcion con mas alto.",
+  "_fuente": "TAG PRECIOS 8x3,8_casamoda.pdf — medidas extraidas del PDF original, en mm salvo que se indique lo contrario 2026-10-20: modo precio unico (Rauch/Ayacucho/Madariaga) = sin pastilla 'Lista', precio mucho mas grande y descripcion con mas alto. 2026-10-21: precio Efectivo (lista 6) mas grande que el de Lista cuando la etiqueta trae dos precios. 2026-10-21: relacion Efectivo/Lista igual a la de Grand Bazaar.",
   "label": {
     "width_mm": 80,
     "height_mm": 38,
@@ -85,15 +85,15 @@
       "_nota": "RESUELTO (2026-09-04): precio_lista6 de la base (el que se cobra en caja), resuelto en lib/precios/resolver-precio.ts. Antes era igual a precio_lista como placeholder -- ya no.",
       "format": "moneda_ars_sin_decimales",
       "x": 24.6,
-      "baseline_y": 15.1,
-      "w": 51.4,
+      "baseline_y": 15.68,
+      "w": 51.91,
       "font": "extrabold",
-      "size_pt": 26,
+      "size_pt": 26.9,
       "color": "ink",
       "align": "left",
       "solo_dos_precios": true,
       "ajustar_a_w": true,
-      "min_size_pt": 12
+      "min_size_pt": 14.8
     },
     {
       "id": "linea_2",
@@ -131,14 +131,14 @@
       "_nota": "RESUELTO (2026-09-04): precio_lista2 (Ayacucho/Rauch/Madariaga) o precio_lista3 (resto), segun sucursal -- ver lib/precios/resolver-precio.ts.",
       "format": "moneda_ars_sin_decimales",
       "x": 24.6,
-      "baseline_y": 25.5,
-      "w": 51.4,
+      "baseline_y": 25.75,
+      "w": 51.91,
       "font": "extrabold",
       "size_pt": 24,
       "color": "ink",
       "align": "left",
       "ajustar_a_w": true,
-      "min_size_pt": 12,
+      "min_size_pt": 13.2,
       "precio_unico": {
         "baseline_y": 23.69,
         "size_pt": 34.2,

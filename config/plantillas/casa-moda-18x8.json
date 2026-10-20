@@ -1,7 +1,7 @@
 {
   "id": "casa-moda-18x8",
   "marca": "Casa Moda",
-  "_fuente": "2026-10-19: medida Cartel 18x8cm (18x8cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra. 2026-10-20: modo precio unico (Rauch/Ayacucho/Madariaga) = sin pastilla 'Lista', precio mucho mas grande y descripcion con mas alto.",
+  "_fuente": "2026-10-19: medida Cartel 18x8cm (18x8cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra. 2026-10-20: modo precio unico (Rauch/Ayacucho/Madariaga) = sin pastilla 'Lista', precio mucho mas grande y descripcion con mas alto. 2026-10-21: precio Efectivo (lista 6) mas grande que el de Lista cuando la etiqueta trae dos precios. 2026-10-21: relacion Efectivo/Lista igual a la de Grand Bazaar.",
   "label": {
     "width_mm": 180,
     "height_mm": 80,
@@ -85,13 +85,15 @@
       "_nota": "RESUELTO (2026-09-04): precio_lista6 de la base (el que se cobra en caja), resuelto en lib/precios/resolver-precio.ts. Antes era igual a precio_lista como placeholder -- ya no.",
       "format": "moneda_ars_sin_decimales",
       "x": 55.35,
-      "baseline_y": 31.79,
-      "w": 103.5,
+      "baseline_y": 31.8,
+      "w": 116.8,
       "font": "extrabold",
-      "size_pt": 44,
+      "size_pt": 46.2,
       "color": "ink",
       "align": "left",
-      "solo_dos_precios": true
+      "solo_dos_precios": true,
+      "ajustar_a_w": true,
+      "min_size_pt": 25.4
     },
     {
       "id": "linea_2",
@@ -129,8 +131,8 @@
       "_nota": "RESUELTO (2026-09-04): precio_lista2 (Ayacucho/Rauch/Madariaga) o precio_lista3 (resto), segun sucursal -- ver lib/precios/resolver-precio.ts.",
       "format": "moneda_ars_sin_decimales",
       "x": 55.35,
-      "baseline_y": 53.68,
-      "w": 94.5,
+      "baseline_y": 53.46,
+      "w": 116.8,
       "font": "extrabold",
       "size_pt": 44,
       "color": "ink",
@@ -142,7 +144,7 @@
         "min_size_pt": 42.4
       },
       "ajustar_a_w": true,
-      "min_size_pt": 12
+      "min_size_pt": 24.2
     },
     {
       "id": "linea_3",
