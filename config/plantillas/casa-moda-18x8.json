@@ -1,7 +1,7 @@
 {
   "id": "casa-moda-18x8",
   "marca": "Casa Moda",
-  "_fuente": "2026-10-19: medida Cartel 18x8cm (18x8cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra.",
+  "_fuente": "2026-10-19: medida Cartel 18x8cm (18x8cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra. 2026-10-20: modo precio unico (Rauch/Ayacucho/Madariaga) = sin pastilla 'Lista', precio mucho mas grande y descripcion con mas alto.",
   "label": {
     "width_mm": 180,
     "height_mm": 80,
@@ -43,7 +43,11 @@
       "valign": "top",
       "min_size_pt": 8.4,
       "max_size_pt": 26,
-      "_nota": "Descripcion al maximo tamaño posible: entre max_size_pt y min_size_pt, en 1 o 2 lineas dentro de la caja (ver mejorAjusteTexto en lib/pdf/generar-pdf.ts)."
+      "_nota": "Descripcion al maximo tamaño posible: entre max_size_pt y min_size_pt, en 1 o 2 lineas dentro de la caja (ver mejorAjusteTexto en lib/pdf/generar-pdf.ts).",
+      "precio_unico": {
+        "h": 21.49,
+        "max_size_pt": 24
+      }
     },
     {
       "id": "linea_1",
@@ -53,7 +57,10 @@
       "x1": 172.15,
       "color": "grey",
       "grosor_pt": 0.5,
-      "puntas": false
+      "puntas": false,
+      "precio_unico": {
+        "y": 26.1
+      }
     },
     {
       "id": "pill_efectivo",
@@ -111,7 +118,9 @@
         "size_pt": 12.0,
         "color": "ink"
       },
-      "dy_precio_unico": -11.16
+      "precio_unico": {
+        "y": 38.39
+      }
     },
     {
       "id": "precio_lista",
@@ -126,7 +135,14 @@
       "size_pt": 44,
       "color": "ink",
       "align": "left",
-      "dy_precio_unico": -11.16
+      "precio_unico": {
+        "baseline_y": 50.39,
+        "size_pt": 77.0,
+        "w": 116.8,
+        "min_size_pt": 42.4
+      },
+      "ajustar_a_w": true,
+      "min_size_pt": 12
     },
     {
       "id": "linea_3",

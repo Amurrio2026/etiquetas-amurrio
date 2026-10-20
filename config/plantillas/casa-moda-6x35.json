@@ -1,7 +1,7 @@
 {
   "id": "casa-moda-6x35",
   "marca": "Casa Moda",
-  "_fuente": "2026-10-19: medida 6x3,5cm (6x3.5cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra. 2026-10-19: precios 26/24 pt (CM) y 24/22 pt (GB), descripcion 8 pt, para acercarse al tamaño de letra de las etiquetas de la sucursal. 2026-10-20: franja de descripcion mas alta (2 lineas comodas) y precios algo mas chicos para que la descripcion se lea mas grande.",
+  "_fuente": "2026-10-19: medida 6x3,5cm (6x3.5cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra. 2026-10-19: precios 26/24 pt (CM) y 24/22 pt (GB), descripcion 8 pt, para acercarse al tamaño de letra de las etiquetas de la sucursal. 2026-10-20: franja de descripcion mas alta (2 lineas comodas) y precios algo mas chicos para que la descripcion se lea mas grande. 2026-10-20: modo precio unico (Rauch/Ayacucho/Madariaga) = sin pastilla 'Lista', precio mucho mas grande y descripcion con mas alto.",
   "label": {
     "width_mm": 60,
     "height_mm": 35,
@@ -43,7 +43,11 @@
       "valign": "top",
       "min_size_pt": 5.2,
       "max_size_pt": 10,
-      "_nota": "Descripcion al maximo tamaño posible: entre max_size_pt y min_size_pt, en 1 o 2 lineas dentro de la caja (ver mejorAjusteTexto en lib/pdf/generar-pdf.ts)."
+      "_nota": "Descripcion al maximo tamaño posible: entre max_size_pt y min_size_pt, en 1 o 2 lineas dentro de la caja (ver mejorAjusteTexto en lib/pdf/generar-pdf.ts).",
+      "precio_unico": {
+        "h": 8.88,
+        "max_size_pt": 10.9
+      }
     },
     {
       "id": "linea_1",
@@ -53,7 +57,10 @@
       "x1": 57.38,
       "color": "grey",
       "grosor_pt": 0.5,
-      "puntas": false
+      "puntas": false,
+      "precio_unico": {
+        "y": 10.48
+      }
     },
     {
       "id": "pill_efectivo",
@@ -113,7 +120,9 @@
         "size_pt": 5.0,
         "color": "ink"
       },
-      "dy_precio_unico": -4.1
+      "precio_unico": {
+        "y": 15.63
+      }
     },
     {
       "id": "precio_lista",
@@ -128,9 +137,14 @@
       "size_pt": 21,
       "color": "ink",
       "align": "left",
-      "dy_precio_unico": -4.1,
       "ajustar_a_w": true,
-      "min_size_pt": 14
+      "min_size_pt": 14,
+      "precio_unico": {
+        "baseline_y": 20.07,
+        "size_pt": 25.7,
+        "w": 38.93,
+        "min_size_pt": 14.1
+      }
     },
     {
       "id": "linea_3",

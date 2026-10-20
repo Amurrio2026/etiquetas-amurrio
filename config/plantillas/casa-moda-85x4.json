@@ -1,7 +1,7 @@
 {
   "id": "casa-moda-85x4",
   "marca": "Casa Moda",
-  "_fuente": "2026-10-19: medida 8,5x4cm (8.5x4cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra.",
+  "_fuente": "2026-10-19: medida 8,5x4cm (8.5x4cm, ancho x alto). Escalada desde la plantilla grande de Casa Moda con la MISMA tipografia; solo se ajustaron los tamaños de letra. 2026-10-20: modo precio unico (Rauch/Ayacucho/Madariaga) = sin pastilla 'Lista', precio mucho mas grande y descripcion con mas alto.",
   "label": {
     "width_mm": 85,
     "height_mm": 40,
@@ -43,7 +43,11 @@
       "valign": "top",
       "min_size_pt": 4.8,
       "max_size_pt": 13,
-      "_nota": "Descripcion al maximo tamaño posible: entre max_size_pt y min_size_pt, en 1 o 2 lineas dentro de la caja (ver mejorAjusteTexto en lib/pdf/generar-pdf.ts)."
+      "_nota": "Descripcion al maximo tamaño posible: entre max_size_pt y min_size_pt, en 1 o 2 lineas dentro de la caja (ver mejorAjusteTexto en lib/pdf/generar-pdf.ts).",
+      "precio_unico": {
+        "h": 10.54,
+        "max_size_pt": 13.0
+      }
     },
     {
       "id": "linea_1",
@@ -53,7 +57,10 @@
       "x1": 81.29,
       "color": "grey",
       "grosor_pt": 0.5,
-      "puntas": false
+      "puntas": false,
+      "precio_unico": {
+        "y": 13.05
+      }
     },
     {
       "id": "pill_efectivo",
@@ -111,7 +118,9 @@
         "size_pt": 6.2,
         "color": "ink"
       },
-      "dy_precio_unico": -5.58
+      "precio_unico": {
+        "y": 19.19
+      }
     },
     {
       "id": "precio_lista",
@@ -126,7 +135,14 @@
       "size_pt": 22,
       "color": "ink",
       "align": "left",
-      "dy_precio_unico": -5.58
+      "precio_unico": {
+        "baseline_y": 24.98,
+        "size_pt": 36.4,
+        "w": 55.15,
+        "min_size_pt": 20.0
+      },
+      "ajustar_a_w": true,
+      "min_size_pt": 12
     },
     {
       "id": "linea_3",

@@ -1,7 +1,7 @@
 {
   "id": "casa-moda",
   "marca": "Casa Moda",
-  "_fuente": "TAG PRECIOS 8x3,8_casamoda.pdf — medidas extraidas del PDF original, en mm salvo que se indique lo contrario",
+  "_fuente": "TAG PRECIOS 8x3,8_casamoda.pdf — medidas extraidas del PDF original, en mm salvo que se indique lo contrario 2026-10-20: modo precio unico (Rauch/Ayacucho/Madariaga) = sin pastilla 'Lista', precio mucho mas grande y descripcion con mas alto.",
   "label": {
     "width_mm": 80,
     "height_mm": 38,
@@ -43,7 +43,11 @@
       "valign": "top",
       "min_size_pt": 5.5,
       "max_size_pt": 13,
-      "_nota": "Descripcion al maximo tamaño posible: entre max_size_pt y min_size_pt, en 1 o 2 lineas dentro de la caja (ver mejorAjusteTexto en lib/pdf/generar-pdf.ts)."
+      "_nota": "Descripcion al maximo tamaño posible: entre max_size_pt y min_size_pt, en 1 o 2 lineas dentro de la caja (ver mejorAjusteTexto en lib/pdf/generar-pdf.ts).",
+      "precio_unico": {
+        "h": 10.0,
+        "max_size_pt": 12.3
+      }
     },
     {
       "id": "linea_1",
@@ -53,7 +57,10 @@
       "x1": 76.51,
       "color": "grey",
       "grosor_pt": 0.5,
-      "puntas": false
+      "puntas": false,
+      "precio_unico": {
+        "y": 12.4
+      }
     },
     {
       "id": "pill_efectivo",
@@ -113,7 +120,9 @@
         "size_pt": 6.5,
         "color": "ink"
       },
-      "dy_precio_unico": -5.3
+      "precio_unico": {
+        "y": 18.23
+      }
     },
     {
       "id": "precio_lista",
@@ -128,9 +137,14 @@
       "size_pt": 24,
       "color": "ink",
       "align": "left",
-      "dy_precio_unico": -5.3,
       "ajustar_a_w": true,
-      "min_size_pt": 12
+      "min_size_pt": 12,
+      "precio_unico": {
+        "baseline_y": 23.69,
+        "size_pt": 34.2,
+        "w": 51.91,
+        "min_size_pt": 18.8
+      }
     },
     {
       "id": "linea_3",
