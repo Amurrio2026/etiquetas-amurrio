@@ -36,6 +36,13 @@ export default function ResumenCarga({ titulo, resultado }: Props) {
           valor={resultado.resumen.precioParcial}
           destacado={resultado.resumen.precioParcial > 0 ? "aviso" : undefined}
         />
+        {resultado.resumen.preciosIncompletos !== undefined && (
+          <Metrica
+            etiqueta="Con precio faltante en el archivo"
+            valor={resultado.resumen.preciosIncompletos}
+            destacado={resultado.resumen.preciosIncompletos > 0 ? "error" : undefined}
+          />
+        )}
         <Metrica etiqueta="Duplicados (sumados)" valor={resultado.resumen.duplicados} />
         <Metrica
           etiqueta="Inactivos/discontinuados"
@@ -45,6 +52,18 @@ export default function ResumenCarga({ titulo, resultado }: Props) {
         <Metrica etiqueta="Total etiquetas" valor={resultado.resumen.totalEtiquetas} />
       </div>
 
+      {(resultado.resumen.listasUsadasDelArchivo?.length ?? 0) > 0 && (
+        <p className="text-xs text-green-700">
+          Precios tomados del archivo: {resultado.resumen.listasUsadasDelArchivo?.join(", ")}.
+        </p>
+      )}
+      {(resultado.resumen.listasIgnoradas?.length ?? 0) > 0 && (
+        <p className="text-xs text-amber-600">
+          Columnas ignoradas para esta sucursal: {resultado.resumen.listasIgnoradas?.join(", ")} (no las usa en su
+          etiqueta).
+        </p>
+      )}
+      <ListaDetalle titulo="Con un precio faltante en el archivo (no se generan)" skus={resultado.detalle.preciosIncompletos ?? []} />
       <ListaDetalle titulo="No encontrados" skus={resultado.detalle.noEncontrados} />
       <ListaDetalle titulo="Sin ningún precio cargado (no se generan)" skus={resultado.detalle.sinPrecio} />
       <ListaDetalle titulo="Con Efectivo o Lista en blanco (se generan igual, con '-')" skus={resultado.detalle.precioParcial} />
