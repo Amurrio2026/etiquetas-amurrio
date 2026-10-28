@@ -5,7 +5,13 @@ import {
   buscarArticulosPorProveedor,
   normalizarCodigoContenedor,
 } from "@/lib/db/articulos.repository";
-import { resolverPrecios, listaParaSucursal, esPrecioUnico } from "@/lib/precios/resolver-precio";
+import {
+  resolverPrecios,
+  listaParaSucursal,
+  esPrecioUnico,
+  aplicarPreciosArchivo,
+  type PreciosArchivo,
+} from "@/lib/precios/resolver-precio";
 import type { LineaEtiqueta, Sucursal } from "@/types";
 
 /** En sucursales de precio unico solo cuenta la Lista: Efectivo en null es lo esperado. */
@@ -19,10 +25,14 @@ function precioEnBlanco(sucursal: Sucursal, efectivo: number | null, lista: numb
 export interface LineaPedida {
   sku: string;
   cantidad: number;
+  /** Solo carga masiva con precios en el archivo: pisan a los de la base (ver aplicarPreciosArchivo). */
+  precios?: PreciosArchivo;
 }
 
 export interface ResultadoResolverLineas {
   lineas: LineaEtiqueta[];
+  /** Carga masiva con precios en el archivo: SKUs con una lista necesaria vacia (no se generan). */
+  preciosIncompletos?: string[];
   /** SKUs que no existen en el maestro de articulos. */
   faltantes: string[];
   /** SKUs que existen pero no tienen NINGUNO de los dos precios cargado (no hay nada para imprimir). */
@@ -47,12 +57,18 @@ export async function resolverLineas(pedidas: LineaPedida[], sucursal: Sucursal)
   const faltantes: string[] = [];
   const sinPrecio: string[] = [];
   const precioParcial: string[] = [];
+  const preciosIncompletos: string[] = [];
 
   for (const p of pedidas) {
     if (!p.cantidad || p.cantidad <= 0) continue;
-    const articulo = await buscarArticuloPorSku(p.sku);
-    if (!articulo) {
+    const encontrado = await buscarArticuloPorSku(p.sku);
+    if (!encontrado) {
       faltantes.push(p.sku);
+      continue;
+    }
+    const { articulo, incompleto } = aplicarPreciosArchivo(encontrado, sucursal, p.precios);
+    if (incompleto) {
+      preciosIncompletos.push(p.sku);
       continue;
     }
     const { precioEfectivo, precioLista } = resolverPrecios(articulo, sucursal);
@@ -64,7 +80,7 @@ export async function resolverLineas(pedidas: LineaPedida[], sucursal: Sucursal)
     lineas.push({ articulo: { ...articulo, precioEfectivo, precioLista }, cantidad: p.cantidad });
   }
 
-  return { lineas, faltantes, sinPrecio, precioParcial };
+  return { lineas, faltantes, sinPrecio, precioParcial, preciosIncompletos };
 }
 
 /**
@@ -85,28 +101,38 @@ export async function resolverLineasMasivo(
   const faltantes: string[] = [];
   const sinPrecio: string[] = [];
   const precioParcial: string[] = [];
+  const preciosIncompletos: string[] = [];
   const inactivosODiscontinuados: string[] = [];
 
   for (const p of pedidas) {
     if (!p.cantidad || p.cantidad <= 0) continue;
     const codigo = p.sku.trim();
-    const articulo = encontrados.get(codigo);
-    if (!articulo) {
+    const encontrado = encontrados.get(codigo);
+    if (!encontrado) {
       faltantes.push(p.sku);
       continue;
     }
-    if (!articulo.activo || articulo.discontinuado) inactivosODiscontinuados.push(p.sku);
+    if (!encontrado.activo || encontrado.discontinuado) inactivosODiscontinuados.push(p.sku);
 
+    const { articulo, incompleto } = aplicarPreciosArchivo(encontrado, sucursal, p.precios);
+    if (incompleto) {
+      preciosIncompletos.push(p.sku);
+      continue;
+    }
     const { precioEfectivo, precioLista } = resolverPrecios(articulo, sucursal);
     if (sinNingunPrecio(sucursal, precioEfectivo, precioLista)) {
       sinPrecio.push(p.sku);
       continue;
     }
     if (precioEnBlanco(sucursal, precioEfectivo, precioLista)) precioParcial.push(p.sku);
-    lineas.push({ articulo: { ...articulo, precioEfectivo, precioLista }, cantidad: p.cantidad });
+    lineas.push({
+      articulo: { ...articulo, precioEfectivo, precioLista },
+      cantidad: p.cantidad,
+      ...(p.precios ? { precios: p.precios } : {}),
+    });
   }
 
-  return { lineas, faltantes, sinPrecio, precioParcial, inactivosODiscontinuados };
+  return { lineas, faltantes, sinPrecio, precioParcial, preciosIncompletos, inactivosODiscontinuados };
 }
 
 /**
