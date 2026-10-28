@@ -52,6 +52,8 @@ export interface Sucursal {
 export interface LineaEtiqueta {
   articulo: ArticuloConPrecio;
   cantidad: number;
+  /** Solo carga masiva con precios en el archivo: los que se usaron para esta linea (para reenviarlos al generar el PDF). */
+  precios?: { lista2?: number | null; lista3?: number | null; lista6?: number | null };
 }
 
 export interface FormatoHoja {
