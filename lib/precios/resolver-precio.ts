@@ -15,6 +15,46 @@ export function esPrecioUnico(sucursal: Sucursal): boolean {
   return NOMBRES_LISTA2.has(sucursal.nombre);
 }
 
+/** Precios que puede traer un archivo de carga masiva (undefined = no vino esa columna; null = columna vacia para ese articulo). */
+export interface PreciosArchivo {
+  lista2?: number | null;
+  lista3?: number | null;
+  lista6?: number | null;
+}
+
+/**
+ * Listas que realmente usa una sucursal en su etiqueta (las demas columnas del
+ * archivo se ignoran): precio unico (Rauch/Ayacucho/Madariaga) = solo lista 2;
+ * el resto = lista 6 (Efectivo) + lista 3 (Lista).
+ */
+export function listasUsadasPorSucursal(sucursal: Sucursal): ("lista2" | "lista3" | "lista6")[] {
+  return esPrecioUnico(sucursal) ? ["lista2"] : ["lista6", "lista3"];
+}
+
+/**
+ * Pisa los precios del articulo con los que vienen en el archivo, SOLO para las listas que la
+ * sucursal usa. Si la columna existe en el archivo pero la celda esta vacia o no es un numero
+ * mayor a 0 => `incompleto` (la etiqueta no se genera). Si la columna no vino en el archivo,
+ * se mantiene el precio de la base.
+ */
+export function aplicarPreciosArchivo(
+  articulo: Articulo,
+  sucursal: Sucursal,
+  precios: PreciosArchivo | undefined
+): { articulo: Articulo; incompleto: boolean } {
+  if (!precios) return { articulo, incompleto: false };
+  const copia: Articulo = { ...articulo };
+  for (const lista of listasUsadasPorSucursal(sucursal)) {
+    const v = precios[lista];
+    if (v === undefined) continue;
+    if (v === null || !(v > 0)) return { articulo, incompleto: true };
+    if (lista === "lista2") copia.precioLista2 = v;
+    else if (lista === "lista3") copia.precioLista3 = v;
+    else copia.precioLista6 = v;
+  }
+  return { articulo: copia, incompleto: false };
+}
+
 /**
  * Divisor para obtener el "precio sin impuestos nacionales" a partir del precio
  * de Lista de la sucursal (2026-10-15, pedido de Lucila): precio de lista / 1,21.
